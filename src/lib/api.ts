@@ -23,7 +23,7 @@ class APIClient {
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers: {
-        ...this.getHeaders(options.headers !== undefined),
+        ...this.getHeaders(),
         ...options.headers,
       },
     });
