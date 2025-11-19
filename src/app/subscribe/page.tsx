@@ -54,6 +54,18 @@ function SubscribeContent() {
     }
 
     fetchUserPlan();
+
+    // Listen for auth changes (e.g., user just signed up)
+    const handleAuthChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.action === 'login') {
+        // User just logged in, re-fetch their plan
+        fetchUserPlan();
+      }
+    };
+
+    window.addEventListener('fratgpt-auth-change', handleAuthChange);
+    return () => window.removeEventListener('fratgpt-auth-change', handleAuthChange);
   }, []);
 
   const handlePlanClick = async (plan: 'free' | 'basic' | 'pro') => {
