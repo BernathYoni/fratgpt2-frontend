@@ -8,33 +8,32 @@ const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID || ''; // Add this to 
 function syncTokenWithExtension(token: string | null) {
   if (typeof window !== 'undefined' && typeof (window as any).chrome !== 'undefined') {
     const chromeRuntime = (window as any).chrome?.runtime;
-    if (!chromeRuntime) return;
+    if (!chromeRuntime) {
+      console.log('[AUTH-SYNC] chrome.runtime not available');
+      return;
+    }
 
     try {
       const message = token
         ? { type: 'SET_TOKEN', token }
         : { type: 'REMOVE_TOKEN' };
 
-      // Try to send to extension
-      if (EXTENSION_ID) {
-        // Published extension with known ID
-        chromeRuntime.sendMessage(EXTENSION_ID, message, (response: any) => {
-          if (chromeRuntime.lastError) {
-            console.log('Extension not available for sync');
-          }
-        });
-      } else {
-        // Unpacked extension - externally_connectable handles this
-        chromeRuntime.sendMessage(message, (response: any) => {
-          if (chromeRuntime.lastError) {
-            console.log('Extension not available for sync');
-          }
-        });
-      }
+      console.log('[AUTH-SYNC] 📤 Sending message to extension:', message.type);
+
+      // Send message - extension must be listed in externally_connectable
+      chromeRuntime.sendMessage(message, (response: any) => {
+        if (chromeRuntime.lastError) {
+          console.log('[AUTH-SYNC] ⚠️ Extension not installed or not responding:', chromeRuntime.lastError.message);
+        } else {
+          console.log('[AUTH-SYNC] ✅ Extension acknowledged:', response);
+        }
+      });
     } catch (err) {
       // Extension not installed - that's okay
-      console.log('Extension not available');
+      console.log('[AUTH-SYNC] ❌ Error syncing with extension:', err);
     }
+  } else {
+    console.log('[AUTH-SYNC] Not in browser or Chrome not available');
   }
 }
 
