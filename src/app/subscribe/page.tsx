@@ -17,7 +17,7 @@ function SubscribeContent() {
   const [currentPlan, setCurrentPlan] = useState<'free' | 'basic' | 'pro' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpgrading, setIsUpgrading] = useState(false);
-  const [onboardingCompleted, setOnboardingCompleted] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false); // User just signed up, selecting plan for first time
 
   useEffect(() => {
     async function fetchUserPlan() {
@@ -26,6 +26,14 @@ function SubscribeContent() {
 
       console.log('[SUBSCRIBE] 🔍 Checking user authentication...');
       console.log('[SUBSCRIBE] localStorage authToken on page load:', localStorage.getItem('authToken') ? 'EXISTS' : 'MISSING');
+
+      // Check if user just signed up (flag set by signup page)
+      const justSignedUp = localStorage.getItem('just_signed_up') === 'true';
+      if (justSignedUp) {
+        console.log('[SUBSCRIBE] 🆕 User just signed up, selecting plan for first time');
+        setIsNewUser(true);
+        localStorage.removeItem('just_signed_up'); // Clear flag
+      }
 
       const token = getToken();
 
@@ -102,8 +110,9 @@ function SubscribeContent() {
 
     console.log('[SUBSCRIBE] ✓ User IS authenticated with token');
 
-    // If clicking current plan, do nothing UNLESS it's free plan and onboarding not complete
-    if (currentPlan === plan && !(plan === 'free' && !onboardingCompleted)) {
+    // If clicking current plan, do nothing UNLESS it's free plan and user is new
+    if (currentPlan === plan && !(plan === 'free' && isNewUser)) {
+      console.log('[SUBSCRIBE] Already on this plan, ignoring click');
       return;
     }
 
@@ -171,15 +180,15 @@ function SubscribeContent() {
     const isCurrent = currentPlan === plan;
     const isLoggedIn = isAuthenticated();
 
-    // Special case: Free plan when user just signed up (onboarding not complete)
+    // Special case: Free plan when user just signed up
     // Show "Continue with Free" instead of "Current"
-    if (isCurrent && isLoggedIn && plan === 'free' && !onboardingCompleted) {
+    if (isCurrent && isLoggedIn && plan === 'free' && isNewUser) {
       return (
         <Button
           variant="outline"
           className="w-full text-sm py-2.5 font-bold"
           onClick={() => handlePlanClick('free')}
-          disabled={isUpgrading}
+          disabled={isUpgrading || isLoading}
         >
           {isUpgrading ? 'Processing...' : 'Continue with Free'}
         </Button>

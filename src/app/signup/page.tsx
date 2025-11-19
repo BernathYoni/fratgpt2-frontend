@@ -245,6 +245,8 @@ function SignupContent() {
       if (!plan) {
         // No plan selected - redirect to subscribe page to choose one
         console.log('[SIGNUP] 🔀 No plan selected, redirecting to /subscribe...');
+        // Set flag so subscribe page knows this is a new user selecting their first plan
+        localStorage.setItem('just_signed_up', 'true');
         router.push('/subscribe');
         return;
       }
