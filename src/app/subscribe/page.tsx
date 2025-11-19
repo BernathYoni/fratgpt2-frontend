@@ -223,6 +223,9 @@ function SubscribeContent() {
     } else if (!isLoggedIn) {
       // Not logged in - signing up
       buttonText = plan === 'free' ? 'Continue with Free' : 'Subscribe';
+    } else if (isNewUser) {
+      // New user selecting plan for first time - all plans say "Subscribe"
+      buttonText = plan === 'free' ? 'Continue with Free' : 'Subscribe';
     } else if (isDowngrade) {
       buttonText = 'Downgrade';
     } else if (isUpgrade) {
