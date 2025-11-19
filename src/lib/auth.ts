@@ -1,12 +1,26 @@
 // Client-side auth utilities
 
-// Extension ID - will be set once extension is published
-// For now, users need to load unpacked extension and it will work with externally_connectable
-const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID || ''; // Add this to .env once published
+// Extension ID - MUST be set for chrome.runtime.sendMessage to work from webpage
+// Get this from chrome://extensions/ when you load the unpacked extension
+// For development: Set this in .env.local as NEXT_PUBLIC_EXTENSION_ID
+// For production: Will be the published extension ID
+const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID || '';
 
 // Sync token with Chrome extension
 function syncTokenWithExtension(token: string | null) {
   console.log('[AUTH-SYNC] 🚀 syncTokenWithExtension called with token:', token ? `${token.substring(0, 20)}...` : 'null');
+  console.log('[AUTH-SYNC] Extension ID configured:', EXTENSION_ID || 'NOT SET');
+
+  if (!EXTENSION_ID) {
+    console.log('[AUTH-SYNC] ⚠️ EXTENSION_ID not configured. Please set NEXT_PUBLIC_EXTENSION_ID in .env.local');
+    console.log('[AUTH-SYNC] To find your extension ID:');
+    console.log('[AUTH-SYNC] 1. Go to chrome://extensions/');
+    console.log('[AUTH-SYNC] 2. Enable Developer mode');
+    console.log('[AUTH-SYNC] 3. Find "FratGPT 2.0" and copy the ID');
+    console.log('[AUTH-SYNC] 4. Add to .env.local: NEXT_PUBLIC_EXTENSION_ID=your_id_here');
+    return;
+  }
+
   console.log('[AUTH-SYNC] typeof window:', typeof window);
   console.log('[AUTH-SYNC] typeof chrome:', typeof (window as any).chrome);
 
@@ -25,10 +39,11 @@ function syncTokenWithExtension(token: string | null) {
         ? { type: 'SET_TOKEN', token }
         : { type: 'REMOVE_TOKEN' };
 
-      console.log('[AUTH-SYNC] 📤 Sending message to extension:', message.type);
+      console.log('[AUTH-SYNC] 📤 Sending message to extension ID:', EXTENSION_ID);
+      console.log('[AUTH-SYNC] Message type:', message.type);
 
-      // Send message - extension must be listed in externally_connectable
-      chromeRuntime.sendMessage(message, (response: any) => {
+      // Send message with extension ID - required when calling from webpage
+      chromeRuntime.sendMessage(EXTENSION_ID, message, (response: any) => {
         if (chromeRuntime.lastError) {
           console.log('[AUTH-SYNC] ⚠️ Extension not installed or not responding:', chromeRuntime.lastError.message);
         } else {
