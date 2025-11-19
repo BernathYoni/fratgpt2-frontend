@@ -1,6 +1,6 @@
-// API client for connecting to Railway backend
+// API client for connecting to backend
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://fratgpt-production.up.railway.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.fratgpt.co';
 
 export interface ApiResponse<T = any> {
   success: boolean;
