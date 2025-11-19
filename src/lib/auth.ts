@@ -6,7 +6,10 @@ const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID || ''; // Add this to 
 
 // Sync token with Chrome extension
 function syncTokenWithExtension(token: string | null) {
-  if (typeof window !== 'undefined' && typeof chrome !== 'undefined' && chrome.runtime) {
+  if (typeof window !== 'undefined' && typeof (window as any).chrome !== 'undefined') {
+    const chromeRuntime = (window as any).chrome?.runtime;
+    if (!chromeRuntime) return;
+
     try {
       const message = token
         ? { type: 'SET_TOKEN', token }
@@ -15,15 +18,15 @@ function syncTokenWithExtension(token: string | null) {
       // Try to send to extension
       if (EXTENSION_ID) {
         // Published extension with known ID
-        chrome.runtime.sendMessage(EXTENSION_ID, message, (response) => {
-          if (chrome.runtime.lastError) {
+        chromeRuntime.sendMessage(EXTENSION_ID, message, (response: any) => {
+          if (chromeRuntime.lastError) {
             console.log('Extension not available for sync');
           }
         });
       } else {
         // Unpacked extension - externally_connectable handles this
-        chrome.runtime.sendMessage(message, (response) => {
-          if (chrome.runtime.lastError) {
+        chromeRuntime.sendMessage(message, (response: any) => {
+          if (chromeRuntime.lastError) {
             console.log('Extension not available for sync');
           }
         });
