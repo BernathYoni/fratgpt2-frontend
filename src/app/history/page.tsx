@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { DashboardLayout } from '../components/layouts/DashboardLayout';
+import { Navigation } from '../components/Navigation';
 import { Card } from '../components/ui/Card';
 import { api } from '@/lib/api';
 import { getToken } from '@/lib/auth';
@@ -36,8 +36,10 @@ export default function HistoryPage() {
   };
 
   return (
-    <DashboardLayout active="history">
-      <h1 className="text-3xl font-bold mb-8">Solve History</h1>
+    <div className="min-h-screen">
+      <Navigation />
+      <div className="max-w-6xl mx-auto px-6 pt-20 sm:pt-24 lg:pt-32 pb-12">
+        <h1 className="text-3xl font-bold mb-8">Solve History</h1>
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
@@ -80,6 +82,7 @@ export default function HistoryPage() {
           ))}
         </div>
       )}
-    </DashboardLayout>
+      </div>
+    </div>
   );
 }
