@@ -52,7 +52,7 @@ export class ApiClient {
 
   // Auth endpoints
   async register(email: string, password: string, firstName?: string, lastName?: string): Promise<ApiResponse<any>> {
-    return this.request('/auth/signup', {
+    return this.request('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, firstName, lastName }),
     });
