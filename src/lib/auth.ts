@@ -6,10 +6,17 @@ const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID || ''; // Add this to 
 
 // Sync token with Chrome extension
 function syncTokenWithExtension(token: string | null) {
+  console.log('[AUTH-SYNC] 🚀 syncTokenWithExtension called with token:', token ? `${token.substring(0, 20)}...` : 'null');
+  console.log('[AUTH-SYNC] typeof window:', typeof window);
+  console.log('[AUTH-SYNC] typeof chrome:', typeof (window as any).chrome);
+
   if (typeof window !== 'undefined' && typeof (window as any).chrome !== 'undefined') {
+    console.log('[AUTH-SYNC] ✓ Window and chrome are available');
     const chromeRuntime = (window as any).chrome?.runtime;
+    console.log('[AUTH-SYNC] chromeRuntime:', chromeRuntime ? 'EXISTS' : 'UNDEFINED');
+
     if (!chromeRuntime) {
-      console.log('[AUTH-SYNC] chrome.runtime not available');
+      console.log('[AUTH-SYNC] ❌ chrome.runtime not available');
       return;
     }
 
@@ -33,7 +40,8 @@ function syncTokenWithExtension(token: string | null) {
       console.log('[AUTH-SYNC] ❌ Error syncing with extension:', err);
     }
   } else {
-    console.log('[AUTH-SYNC] Not in browser or Chrome not available');
+    console.log('[AUTH-SYNC] ❌ Not in browser or Chrome not available');
+    console.log('[AUTH-SYNC] Details - window undefined?', typeof window === 'undefined', ', chrome undefined?', typeof (window as any).chrome === 'undefined');
   }
 }
 
@@ -44,6 +52,7 @@ export function saveToken(token: string) {
     console.log('[AUTH] ✓ Token saved to localStorage');
 
     // Sync with extension
+    console.log('[AUTH] 🔄 About to call syncTokenWithExtension...');
     syncTokenWithExtension(token);
     console.log('[AUTH] ✓ Extension sync initiated');
 
