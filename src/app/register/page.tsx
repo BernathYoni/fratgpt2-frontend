@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Navigation } from '../components/Navigation';
 import { api } from '@/lib/api';
+import { saveToken } from '@/lib/auth';
+import { CheckCircle } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -17,8 +22,14 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    // Validation
+    if (!email || !password || !confirmPassword) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address');
       return;
     }
 
@@ -27,99 +38,134 @@ export default function RegisterPage() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { token } = await api.register(email, password);
-      localStorage.setItem('fratgpt_token', token);
+      const registerRes = await api.register(email, password);
+
+      if (!registerRes.success || !registerRes.data?.token) {
+        const errorMsg = registerRes.error || 'Registration failed';
+        if (errorMsg.toLowerCase().includes('exists') || errorMsg.toLowerCase().includes('already')) {
+          setError('An account with this email already exists. Please login instead.');
+        } else {
+          setError(errorMsg);
+        }
+        setLoading(false);
+        return;
+      }
+
+      saveToken(registerRes.data.token);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
-    } finally {
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('Unable to connect to server. Please check your internet connection.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center px-4 text-gray-900">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold text-blue-600">
-            FratGPT 2.0
-          </Link>
-          <h1 className="text-2xl font-bold mt-4">Get Started Free</h1>
-          <p className="text-gray-600 mt-2">Create your account and start solving</p>
-        </div>
+    <div className="min-h-screen">
+      <Navigation />
 
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
+      <div className="flex items-center justify-center p-6 md:p-8 pt-20 sm:pt-24 lg:pt-28 min-h-screen">
+        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl w-full">
+          {/* Left Side - Form */}
+          <div className="w-full">
+            <div className="mb-8">
+              <h1 className="text-3xl md:text-4xl font-bold mb-3">Create your account</h1>
+              <p className="text-text-secondary text-base">Join thousands of students improving their grades</p>
+            </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <Input
                 type="email"
+                label="Email"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="you@example.com"
+                autoFocus
               />
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
+              <Input
                 type="password"
+                label="Password"
+                placeholder="At least 8 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="At least 8 characters"
               />
-            </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
+              <Input
                 type="password"
+                label="Confirm Password"
+                placeholder="Re-enter your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="••••••••"
               />
+
+              {error && (
+                <div className="bg-error/10 border border-error text-error px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+
+              <Button type="submit" className="w-full text-base py-3" disabled={loading}>
+                {loading ? 'Creating account...' : 'Create Account'}
+              </Button>
+            </form>
+
+            <p className="mt-6 text-center text-text-secondary text-sm">
+              Already have an account?{' '}
+              <Link href="/login" className="bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent hover:underline font-semibold">
+                Log in
+              </Link>
+            </p>
+          </div>
+
+          {/* Right Side - Features */}
+          <div className="hidden lg:block">
+            <div className="bg-gradient-to-br from-pink-500/10 via-orange-500/10 to-yellow-500/10 border border-orange-500/30 rounded-3xl p-8 h-full">
+              <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+                Why FratGPT?
+              </h3>
+              <div className="space-y-6">
+                <FeatureItem
+                  title="Instant Solutions"
+                  description="Get homework answers in seconds with our AI-powered solver"
+                />
+                <FeatureItem
+                  title="Step-by-Step Help"
+                  description="Understand how to solve problems with detailed explanations"
+                />
+                <FeatureItem
+                  title="Works Anywhere"
+                  description="Chrome extension works on any website or homework platform"
+                />
+              </div>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              Sign in
-            </Link>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function FeatureItem({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center mt-1">
+        <CheckCircle className="w-4 h-4 text-white" />
+      </div>
+      <div>
+        <h4 className="font-semibold text-lg mb-1">{title}</h4>
+        <p className="text-text-secondary text-sm">{description}</p>
       </div>
     </div>
   );

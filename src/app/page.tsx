@@ -1,184 +1,306 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
+import { Button } from './components/ui/Button';
+import { Navigation } from './components/Navigation';
+import {
+  Scissors,
+  Star,
+  ArrowRight,
+  CheckCircle,
+  Download,
+  Brain,
+  Sparkles
+} from 'lucide-react';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white text-gray-900">
-      {/* Header */}
-      <header className="container mx-auto px-4 py-6">
-        <nav className="flex justify-between items-center">
-          <div className="text-2xl font-bold text-blue-600">FratGPT 2.0</div>
-          <div className="space-x-4">
-            <Link href="/login" className="text-gray-600 hover:text-gray-900">
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Get Started
-            </Link>
-          </div>
-        </nav>
-      </header>
+    <div className="min-h-screen">
+      <Navigation />
 
-      {/* Hero */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-5xl font-bold mb-6">
-          Homework Like a <span className="text-blue-600">Frat Bro</span>
-        </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          AI-powered homework help that actually gets you. Screenshot your problem,
-          get instant answers and explanations.
-        </p>
-        <div className="flex justify-center gap-4">
-          <Link
-            href="/register"
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-lg"
-          >
-            Start Free <ArrowRight size={20} />
-          </Link>
-          <a
-            href="#pricing"
-            className="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 text-lg"
-          >
-            See Pricing
-          </a>
-        </div>
-      </section>
+      {/* Hero Section */}
+      <section className="relative pt-20 sm:pt-24 pb-16 sm:pb-24 overflow-hidden">
+        {/* Gradient background effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-transparent to-transparent pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-pink-500/20 to-orange-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-yellow-500/10 to-pink-500/10 rounded-full blur-3xl"></div>
 
-      {/* Features */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="text-center p-6">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Zap className="text-blue-600" size={32} />
+        <div className="relative z-10">
+          <div className="grid lg:grid-cols-2 gap-6 sm:p-8 lg:p-12 items-center px-4 sm:px-8 lg:px-24">
+            {/* Left Side - Content */}
+            <div>
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">
+                <span className="text-text-primary">Your Best</span>
+                <br />
+                <span className="bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">AI Homework Helper</span>
+                <br />
+                <span className="text-text-primary">Extension</span>
+              </h1>
+
+              <p className="text-xl md:text-2xl text-text-secondary mb-12 leading-relaxed">
+                Snap a screenshot of any homework problem and get instant, step-by-step solutions powered by advanced AI. Join 100,000+ students getting better grades.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/signup">
+                  <Button size="md" className="w-full sm:w-auto group whitespace-nowrap">
+                    Add to Chrome - It's Free
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <h3 className="text-xl font-bold mb-2">Lightning Fast</h3>
-            <p className="text-gray-600">
-              Get answers in seconds with our Fast mode, or deep explanations with Regular mode
-            </p>
-          </div>
-          <div className="text-center p-6">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="text-blue-600" size={32} />
+
+            {/* Right Side - Video/Image Placeholder */}
+            <div className="hidden lg:block">
+              <div className="bg-surface border border-border rounded-3xl aspect-video flex items-center justify-center relative overflow-hidden shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-orange-500/5 to-yellow-500/5"></div>
+                <div className="text-center relative z-10">
+                  <div className="text-6xl mb-4">🎥</div>
+                  <p className="text-text-secondary">Video Display Area</p>
+                  <p className="text-text-muted text-sm">Coming Soon</p>
+                </div>
+              </div>
             </div>
-            <h3 className="text-xl font-bold mb-2">Expert Consensus</h3>
-            <p className="text-gray-600">
-              Expert mode uses 3 AI models and creates a consensus answer for ultimate accuracy
-            </p>
-          </div>
-          <div className="text-center p-6">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="text-blue-600" size={32} />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Chrome Extension</h3>
-            <p className="text-gray-600">
-              Screenshot or snip any homework problem directly from your browser
-            </p>
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="container mx-auto px-4 py-20">
-        <h2 className="text-4xl font-bold text-center mb-12">Simple Pricing</h2>
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {/* Free */}
-          <div className="border-2 rounded-lg p-8">
-            <h3 className="text-2xl font-bold mb-4">Free</h3>
-            <div className="text-4xl font-bold mb-4">$0<span className="text-lg text-gray-600">/mo</span></div>
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>20 solves per day</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>All 3 modes</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Chat history</span>
-              </li>
-            </ul>
-            <Link
-              href="/register"
-              className="block w-full text-center border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50"
-            >
-              Get Started
-            </Link>
-          </div>
-
-          {/* Basic */}
-          <div className="border-2 border-blue-600 rounded-lg p-8 relative">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm">
-              Popular
+      {/* Stats Section */}
+      <section className="py-16 px-4 sm:px-8 lg:px-24">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent mb-2">1 Million+</div>
+              <div className="text-text-secondary text-lg">Problems Solved</div>
             </div>
-            <h3 className="text-2xl font-bold mb-4">Basic</h3>
-            <div className="text-4xl font-bold mb-4">$9<span className="text-lg text-gray-600">/mo</span></div>
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>50 solves per day</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>All 3 modes</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Priority support</span>
-              </li>
-            </ul>
-            <Link
-              href="/register"
-              className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Upgrade Now
-            </Link>
+            <div className="text-center">
+              <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent mb-2">98%</div>
+              <div className="text-text-secondary text-lg">Accuracy Rate</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 text-5xl md:text-6xl font-bold bg-gradient-to-r from-yellow-500 to-pink-500 bg-clip-text text-transparent mb-2">
+                4.9
+                <Star className="w-10 h-10 fill-yellow-500 text-yellow-500" />
+              </div>
+              <div className="text-text-secondary text-lg">User Rating</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 px-4 sm:px-8 lg:px-24 scroll-mt-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">How It Works</h2>
+            <p className="text-xl text-text-secondary">Get started in under 60 seconds</p>
           </div>
 
-          {/* Pro */}
-          <div className="border-2 rounded-lg p-8">
-            <h3 className="text-2xl font-bold mb-4">Pro</h3>
-            <div className="text-4xl font-bold mb-4">$19<span className="text-lg text-gray-600">/mo</span></div>
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Unlimited solves</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>All 3 modes</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Premium support</span>
-              </li>
-            </ul>
-            <Link
-              href="/register"
-              className="block w-full text-center border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50"
-            >
-              Go Pro
-            </Link>
+          <div className="grid md:grid-cols-3 gap-6 sm:p-8 lg:p-12">
+            <StepCard
+              step="1"
+              title="Install Extension"
+              description="Add FratGPT to your Chrome browser with one click. It's completely free to install."
+              icon={<Download className="w-8 h-8" />}
+            />
+            <StepCard
+              step="2"
+              title="Snap a Problem"
+              description="Use snip mode to select a specific problem or screen mode to capture an entire page."
+              icon={<Scissors className="w-8 h-8" />}
+            />
+            <StepCard
+              step="3"
+              title="Get Instant Solutions"
+              description="Receive detailed step-by-step explanations powered by advanced AI in seconds."
+              icon={<Brain className="w-8 h-8" />}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section id="testimonials" className="py-12 sm:py-16 lg:py-20 px-4 sm:px-8 lg:px-24 scroll-mt-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">What Students Are Saying</h2>
+            <p className="text-xl text-text-secondary">Real feedback from real students</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <TestimonialCard
+              name="Sarah M."
+              role="Computer Science Major"
+              content="FratGPT has been a game-changer for my calculus homework. The step-by-step explanations help me actually understand the concepts!"
+              rating={5}
+            />
+            <TestimonialCard
+              name="Michael T."
+              role="Engineering Student"
+              content="I went from a C to an A in physics after using FratGPT. The explanations are clear and the extension is so easy to use."
+              rating={5}
+            />
+            <TestimonialCard
+              name="Emily R."
+              role="Business Major"
+              content="This tool saved me so much time on my statistics homework. I can finally focus on my other classes and still get good grades."
+              rating={5}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-12 sm:py-16 lg:py-20 px-4 sm:px-8 lg:px-24 scroll-mt-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Frequently Asked Questions</h2>
+            <p className="text-xl text-text-secondary">Everything you need to know</p>
+          </div>
+
+          <div className="space-y-6">
+            <FAQItem
+              question="How does FratGPT work?"
+              answer="FratGPT is a Chrome extension that uses advanced AI to solve homework problems. Simply take a screenshot of any problem using snip or screen mode, and our AI will provide detailed step-by-step solutions in seconds."
+            />
+            <FAQItem
+              question="What subjects does FratGPT support?"
+              answer="FratGPT supports all major subjects including Math, Physics, Chemistry, Biology, Computer Science, Economics, and more. Our AI is trained on millions of problems across all academic levels."
+            />
+            <FAQItem
+              question="Is there a free trial?"
+              answer="Yes! You can install the extension for free and try it out. We offer a free trial period so you can experience the full power of FratGPT before subscribing."
+            />
+            <FAQItem
+              question="Can I cancel my subscription anytime?"
+              answer="Absolutely! You can cancel your subscription at any time from your account dashboard. No questions asked, no cancellation fees."
+            />
+            <FAQItem
+              question="How accurate are the solutions?"
+              answer="Our AI has a 98% accuracy rate across all subjects and problem types. We continuously improve our AI models to provide the most accurate and helpful solutions possible."
+            />
+            <FAQItem
+              question="Is my data secure?"
+              answer="Yes, we take security very seriously. All your data is encrypted and we never share your information with third parties. Your privacy is our top priority."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-24 px-4 sm:px-8 lg:px-24 relative">
+        <div className="absolute inset-0 bg-gradient-to-t from-pink-500/5 to-transparent pointer-events-none"></div>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="bg-surface border border-orange-500/30 rounded-3xl p-6 sm:p-8 lg:p-12 shadow-2xl shadow-pink-500/20 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 via-orange-500/5 to-yellow-500/10"></div>
+            <div className="relative z-10">
+              <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 rounded-full flex items-center justify-center">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Ace Your Homework?</h2>
+              <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
+                Join 100,000+ students who are already using FratGPT to get better grades and save time
+              </p>
+              <Link href="/signup">
+                <Button size="lg" className="text-lg px-10 py-6">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-gray-600">
-          <p>&copy; 2025 FratGPT. All rights reserved.</p>
-          <div className="mt-4 space-x-4">
-            <Link href="/privacy" className="hover:text-gray-900">Privacy</Link>
-            <Link href="/terms" className="hover:text-gray-900">Terms</Link>
+      <footer className="border-t border-border py-12 px-4 sm:px-8 lg:px-24">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent">FratGPT</h3>
+              <p className="text-text-secondary text-sm">AI-powered homework solver for students. Get instant solutions with step-by-step explanations.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Product</h4>
+              <ul className="space-y-2 text-text-secondary text-sm">
+                <li><Link href="#features" className="hover:text-orange-500 transition-colors">Features</Link></li>
+                <li><Link href="#how-it-works" className="hover:text-pink-500 transition-colors">How It Works</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-text-secondary text-sm">
+                <li><Link href="/privacy" className="hover:text-yellow-500 transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-orange-500 transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2 text-text-secondary text-sm">
+                <li><Link href="/contact" className="hover:text-pink-500 transition-colors">Contact</Link></li>
+                <li><Link href="/login" className="hover:text-orange-500 transition-colors">Login</Link></li>
+                <li><Link href="/signup" className="hover:text-yellow-500 transition-colors">Sign Up</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center text-text-muted text-sm border-t border-border pt-8">
+            © 2025 FratGPT. All rights reserved.
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function StepCard({ step, title, description, icon }: { step: string; title: string; description: string; icon: React.ReactNode }) {
+  const gradients = {
+    '1': 'from-pink-500 to-orange-500',
+    '2': 'from-orange-500 to-yellow-500',
+    '3': 'from-yellow-500 to-pink-500',
+  };
+  const gradient = gradients[step as keyof typeof gradients];
+
+  return (
+    <div className="relative">
+      <div className="flex items-start gap-4">
+        <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center shadow-lg`}>
+          <span className="text-2xl font-bold text-white">{step}</span>
+        </div>
+        <div className="flex-1 pt-2">
+          <h3 className="text-2xl font-semibold mb-2 flex items-center gap-2">
+            {title}
+            <span className={`bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>{icon}</span>
+          </h3>
+          <p className="text-text-secondary text-lg leading-relaxed">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TestimonialCard({ name, role, content, rating }: { name: string; role: string; content: string; rating: number }) {
+  return (
+    <div className="bg-surface border border-border rounded-2xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-lg">
+      <div className="flex gap-1 mb-4">
+        {[...Array(rating)].map((_, i) => (
+          <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+        ))}
+      </div>
+      <p className="text-text-secondary mb-4 italic">"{content}"</p>
+      <div className="border-t border-border pt-4">
+        <div className="font-semibold">{name}</div>
+        <div className="text-sm text-text-muted">{role}</div>
+      </div>
+    </div>
+  );
+}
+
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  return (
+    <div className="bg-surface border border-border rounded-2xl p-6 hover:border-pink-500/50 transition-all duration-300 shadow-lg">
+      <h3 className="text-xl font-semibold mb-3">{question}</h3>
+      <p className="text-text-secondary leading-relaxed">{answer}</p>
     </div>
   );
 }

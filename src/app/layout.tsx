@@ -1,22 +1,25 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
+import type { Metadata } from 'next'
+import './globals.css'
+import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  title: 'FratGPT - Homework Like a Frat Bro',
-  description: 'AI-powered homework help that actually gets you',
-};
+  title: 'FratGPT - Solve Any Homework Problem Instantly',
+  description: 'AI-powered homework solver for students. Snap a photo of any problem and get instant solutions with step-by-step explanations.',
+  keywords: ['homework help', 'AI tutor', 'problem solver', 'study tool', 'education'],
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body suppressHydrationWarning>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
-  );
+  )
 }

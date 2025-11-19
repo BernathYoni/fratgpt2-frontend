@@ -1,20 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
+@theme {
+  --color-background: #000000;
+  --color-surface: #1a1a1a;
+  --color-surface-hover: #252525;
+  --color-border: #2a2a2a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted: #707070;
+  --color-accent: #FFA94D;
+  --color-accent-hover: #FF8C1A;
+  --color-error: #ff4757;
+  --color-success: #2ed573;
+  --color-gradient-start: #FF6B9D;
+  --color-gradient-mid: #FFA94D;
+  --color-gradient-end: #FFD93D;
+}
+
+html {
+  scroll-padding-top: 16px;
 }
 
 body {
-  color: #111827;
-  background: white;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  @apply bg-background text-text-primary antialiased;
 }
