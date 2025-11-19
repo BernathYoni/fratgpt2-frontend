@@ -245,8 +245,6 @@ function SignupContent() {
       if (!plan) {
         // No plan selected - redirect to subscribe page to choose one
         console.log('[SIGNUP] 🔀 No plan selected, redirecting to /subscribe...');
-        // Small delay to ensure token is saved and auth events are processed
-        await new Promise(resolve => setTimeout(resolve, 100));
         router.push('/subscribe');
         return;
       }

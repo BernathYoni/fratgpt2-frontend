@@ -42,11 +42,8 @@ function SubscribeContent() {
 
       console.log('[SUBSCRIBE] 🌐 Fetching user subscription status...');
 
-      // Fetch both subscription status and onboarding status
-      const [subscriptionResponse, onboardingResponse] = await Promise.all([
-        api.getSubscriptionStatus(token),
-        api.getOnboardingStatus(token)
-      ]);
+      // Fetch subscription status only
+      const subscriptionResponse = await api.getSubscriptionStatus(token);
 
       if (subscriptionResponse.success && subscriptionResponse.data) {
         const plan = subscriptionResponse.data.plan || 'free';
@@ -55,11 +52,6 @@ function SubscribeContent() {
       } else {
         console.log('[SUBSCRIBE] ⚠️  No subscription data, defaulting to free');
         setCurrentPlan('free');
-      }
-
-      if (onboardingResponse.success && onboardingResponse.data) {
-        console.log('[SUBSCRIBE] Onboarding status:', onboardingResponse.data.onboardingCompleted ? 'COMPLETED' : 'NOT COMPLETED');
-        setOnboardingCompleted(onboardingResponse.data.onboardingCompleted);
       }
 
       setIsLoading(false);
@@ -87,9 +79,16 @@ function SubscribeContent() {
   const handlePlanClick = async (plan: 'free' | 'basic' | 'pro') => {
     console.log('[SUBSCRIBE] 🎯 Plan clicked:', plan);
 
+    // Wait for loading to complete before processing click
+    if (isLoading) {
+      console.log('[SUBSCRIBE] ⏳ Still loading, please wait...');
+      return;
+    }
+
     // If not logged in, redirect to signup with plan pre-selected
     console.log('[SUBSCRIBE] Checking authentication...');
-    if (!isAuthenticated()) {
+    const token = getToken();
+    if (!token) {
       console.log('[SUBSCRIBE] ❌ User NOT logged in, redirecting to signup with plan...');
       // Clear any old stored plan first
       localStorage.removeItem('selected_plan');
@@ -98,6 +97,8 @@ function SubscribeContent() {
       router.push(`/signup?plan=${plan}`);
       return;
     }
+
+    console.log('[SUBSCRIBE] ✓ User IS authenticated with token');
 
     // If clicking current plan, do nothing UNLESS it's free plan and onboarding not complete
     if (currentPlan === plan && !(plan === 'free' && !onboardingCompleted)) {
@@ -130,24 +131,15 @@ function SubscribeContent() {
 
     // Free plan clicked
     if (plan === 'free') {
-      // If already logged in and onboarding not complete, go to onboarding
-      if (isAuthenticated() && !onboardingCompleted) {
-        const token = getToken();
-        if (token) {
-          // Check device type and redirect to appropriate onboarding
-          const onboardingResponse = await api.getOnboardingStatus(token);
-          if (onboardingResponse.success && onboardingResponse.data) {
-            const isMobile = onboardingResponse.data.isMobileDevice;
-            if (isMobile) {
-              router.push('/onboarding/mobile');
-            } else {
-              router.push('/onboarding/install-extension');
-            }
-            return;
-          }
-        }
+      // If already logged in, go directly to dashboard
+      if (isAuthenticated()) {
+        console.log('[SUBSCRIBE] ✓ Already logged in with free plan, redirecting to dashboard...');
+        router.push('/dashboard');
+        return;
       }
+
       // Not logged in - redirect to signup
+      console.log('[SUBSCRIBE] Not logged in, redirecting to signup with free plan...');
       localStorage.setItem('selected_plan', plan);
       router.push('/signup?plan=free');
       return;
@@ -220,7 +212,9 @@ function SubscribeContent() {
 
     // Determine button text
     let buttonText = 'Subscribe';
-    if (isUpgrading) {
+    if (isLoading) {
+      buttonText = 'Loading...';
+    } else if (isUpgrading) {
       buttonText = 'Processing...';
     } else if (!isLoggedIn) {
       // Not logged in - signing up
@@ -237,7 +231,7 @@ function SubscribeContent() {
         <Button
           className="w-full text-sm py-2.5 font-bold bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600"
           onClick={() => handlePlanClick('basic')}
-          disabled={isUpgrading}
+          disabled={isUpgrading || isLoading}
         >
           {buttonText}
         </Button>
@@ -250,7 +244,7 @@ function SubscribeContent() {
         variant="outline"
         className="w-full text-sm py-2.5 font-bold"
         onClick={() => handlePlanClick(plan)}
-        disabled={isUpgrading}
+        disabled={isUpgrading || isLoading}
       >
         {buttonText}
       </Button>
