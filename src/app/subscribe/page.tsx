@@ -148,14 +148,7 @@ function SubscribeContent() {
     // UPGRADE: Create Stripe checkout session
     console.log('[SUBSCRIBE] ✓ User IS logged in, creating checkout session...');
     setIsUpgrading(true);
-    const token = getToken();
-
-    if (!token) {
-      console.error('[SUBSCRIBE] ❌ No token found (unexpected for authenticated user!)');
-      localStorage.setItem('selected_plan', plan);
-      router.push(`/signup?plan=${plan}`);
-      return;
-    }
+    // token already retrieved above at line 90
 
     console.log('[SUBSCRIBE] 🌐 Calling createCheckoutSession API...');
     const response = await api.createCheckoutSession(token, plan);
