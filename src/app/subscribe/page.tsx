@@ -22,6 +22,7 @@ function SubscribeContent() {
   useEffect(() => {
     async function fetchUserPlan() {
       console.log('[SUBSCRIBE] 🔍 Checking user authentication...');
+      console.log('[SUBSCRIBE] localStorage authToken on page load:', localStorage.getItem('authToken') ? 'EXISTS' : 'MISSING');
 
       if (!isAuthenticated()) {
         console.log('[SUBSCRIBE] ❌ User NOT authenticated');
@@ -39,6 +40,8 @@ function SubscribeContent() {
         setIsLoading(false);
         return;
       }
+
+      console.log('[SUBSCRIBE] ✓ Token found:', token.substring(0, 20) + '...');
 
       console.log('[SUBSCRIBE] 🌐 Fetching user subscription status...');
 
@@ -88,6 +91,11 @@ function SubscribeContent() {
     // If not logged in, redirect to signup with plan pre-selected
     console.log('[SUBSCRIBE] Checking authentication...');
     const token = getToken();
+    console.log('[SUBSCRIBE] Token check result:', token ? `Found: ${token.substring(0, 20)}...` : 'NOT FOUND');
+    console.log('[SUBSCRIBE] localStorage authToken:', localStorage.getItem('authToken') ? 'EXISTS' : 'MISSING');
+    console.log('[SUBSCRIBE] currentPlan:', currentPlan);
+    console.log('[SUBSCRIBE] isLoading:', isLoading);
+
     if (!token) {
       console.log('[SUBSCRIBE] ❌ User NOT logged in, redirecting to signup with plan...');
       // Clear any old stored plan first
