@@ -80,29 +80,8 @@ function LoginContent() {
         return;
       }
 
-      // Check onboarding status
-      const onboardingStatus = await api.getOnboardingStatus(result.data.token);
-
-      if (onboardingStatus.success && onboardingStatus.data && !onboardingStatus.data.onboardingCompleted) {
-        // Redirect to appropriate onboarding page based on device and current step
-        const isMobile = onboardingStatus.data.isMobileDevice;
-        const currentStep = onboardingStatus.data.onboardingStep;
-
-        if (isMobile) {
-          router.push('/onboarding/mobile');
-        } else if (currentStep === 'account_created' || currentStep === 'plan_selected') {
-          router.push('/onboarding/install-extension');
-        } else if (currentStep === 'extension_installed') {
-          router.push('/onboarding/tutorial');
-        } else if (currentStep === 'tutorial_completed') {
-          router.push('/onboarding/demo');
-        } else {
-          router.push('/dashboard');
-        }
-      } else {
-        // Onboarding completed, go to dashboard
-        router.push('/dashboard');
-      }
+      // Redirect to dashboard after Google login
+      router.push('/dashboard');
     } catch (err) {
       console.error('Google auth error:', err);
       setError('Failed to authenticate with Google. Please try again.');
@@ -154,29 +133,8 @@ function LoginContent() {
         return;
       }
 
-      // Check onboarding status
-      const onboardingStatus = await api.getOnboardingStatus(loginRes.data.token);
-
-      if (onboardingStatus.success && onboardingStatus.data && !onboardingStatus.data.onboardingCompleted) {
-        // Redirect to appropriate onboarding page based on device and current step
-        const isMobile = onboardingStatus.data.isMobileDevice;
-        const currentStep = onboardingStatus.data.onboardingStep;
-
-        if (isMobile) {
-          router.push('/onboarding/mobile');
-        } else if (currentStep === 'account_created' || currentStep === 'plan_selected') {
-          router.push('/onboarding/install-extension');
-        } else if (currentStep === 'extension_installed') {
-          router.push('/onboarding/tutorial');
-        } else if (currentStep === 'tutorial_completed') {
-          router.push('/onboarding/demo');
-        } else {
-          router.push('/dashboard');
-        }
-      } else {
-        // Onboarding completed, go to dashboard
-        router.push('/dashboard');
-      }
+      // Redirect to dashboard after login
+      router.push('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       setError('Unable to connect to server. Please check your internet connection and try again.');

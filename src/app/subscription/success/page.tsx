@@ -21,30 +21,11 @@ function SuccessContent() {
         return;
       }
 
-      // Wait for webhook to process
+      // Wait for webhook to process (give Stripe time to update subscription)
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Check onboarding status
-      const onboardingStatus = await api.getOnboardingStatus(token);
-
-      if (onboardingStatus.success && onboardingStatus.data && !onboardingStatus.data.onboardingCompleted) {
-        const isMobile = onboardingStatus.data.isMobileDevice;
-        const currentStep = onboardingStatus.data.onboardingStep;
-
-        if (isMobile) {
-          router.push('/onboarding/mobile');
-        } else if (currentStep === 'account_created' || currentStep === 'plan_selected') {
-          router.push('/onboarding/install-extension');
-        } else if (currentStep === 'extension_installed') {
-          router.push('/onboarding/tutorial');
-        } else if (currentStep === 'tutorial_completed') {
-          router.push('/onboarding/demo');
-        } else {
-          router.push('/dashboard');
-        }
-      } else {
-        router.push('/dashboard');
-      }
+      // Redirect to dashboard - payment successful!
+      router.push('/dashboard');
     }
 
     handleSuccess();

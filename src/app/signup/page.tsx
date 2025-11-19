@@ -230,8 +230,8 @@ function SignupContent() {
 
       // Unified signup flow:
       // 1. No plan selected → Go to subscribe page to pick a plan
-      // 2. Free plan selected → Go directly to onboarding
-      // 3. Paid plan selected → Go to Stripe checkout → Then onboarding
+      // 2. Free plan selected → Go directly to dashboard
+      // 3. Paid plan selected → Go to Stripe checkout → Success page → Dashboard
 
       if (!plan) {
         // No plan selected - redirect to subscribe page to choose one
@@ -240,13 +240,8 @@ function SignupContent() {
       }
 
       if (plan === 'free') {
-        // Free plan - go directly to onboarding
-        const isMobile = isMobileDevice();
-        if (isMobile) {
-          router.push('/onboarding/mobile');
-        } else {
-          router.push('/onboarding/install-extension');
-        }
+        // Free plan - go directly to dashboard
+        router.push('/dashboard');
         return;
       }
 
@@ -260,7 +255,7 @@ function SignupContent() {
           return;
         }
 
-        // Redirect to Stripe
+        // Redirect to Stripe - they'll return to /subscription/success then dashboard
         window.location.href = checkoutRes.data.url;
       } catch (checkoutErr) {
         console.error('Checkout error:', checkoutErr);
