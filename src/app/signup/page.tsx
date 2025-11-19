@@ -193,7 +193,7 @@ function SignupContent() {
       if (!registerRes.success) {
         // Handle specific error messages
         const errorMsg = registerRes.error || 'Failed to create account';
-        if (errorMsg.toLowerCase().includes('already exists') || errorMsg.toLowerCase().includes('duplicate')) {
+        if (errorMsg.toLowerCase().includes('already exists') || errorMsg.toLowerCase().includes('duplicate') || errorMsg.toLowerCase().includes('already registered')) {
           setError('This email is already registered. Try logging in instead.');
         } else if (errorMsg.toLowerCase().includes('invalid email')) {
           setError('Please enter a valid email address');
@@ -204,17 +204,17 @@ function SignupContent() {
         return;
       }
 
-      // Auto-login after signup to get token
-      const loginRes = await api.login(email, password);
+      // Register returns token directly - no need to login again!
+      const token = registerRes.data?.token;
 
-      if (!loginRes.success || !loginRes.data?.token) {
-        setError('Account created successfully! Please log in.');
+      if (!token) {
+        setError('Account created but login failed. Please log in manually.');
         setLoading(false);
         setTimeout(() => router.push('/login'), 2000);
         return;
       }
 
-      const token = loginRes.data.token;
+      // Save token - user is now logged in!
       saveToken(token);
 
       // Clear stored plan from localStorage

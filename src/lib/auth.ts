@@ -43,6 +43,8 @@ export function saveToken(token: string) {
     localStorage.setItem('authToken', token);
     // Sync with extension
     syncTokenWithExtension(token);
+    // Dispatch event so Navigation and other components know user logged in
+    window.dispatchEvent(new CustomEvent('fratgpt-auth-change', { detail: { action: 'login' } }));
   }
 }
 
@@ -59,6 +61,8 @@ export function removeToken() {
     localStorage.removeItem('cachedUser');
     // Sync logout with extension
     syncTokenWithExtension(null);
+    // Dispatch event so Navigation and other components know user logged out
+    window.dispatchEvent(new CustomEvent('fratgpt-auth-change', { detail: { action: 'logout' } }));
   }
 }
 
