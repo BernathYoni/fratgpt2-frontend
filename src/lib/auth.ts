@@ -6,57 +6,53 @@
 // For production: Will be the published extension ID
 const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID || '';
 
-// Sync token with Chrome extension
+// Sync token with Chrome extension via content script bridge
 function syncTokenWithExtension(token: string | null) {
   console.log('[AUTH-SYNC] 🚀 syncTokenWithExtension called with token:', token ? `${token.substring(0, 20)}...` : 'null');
-  console.log('[AUTH-SYNC] Extension ID configured:', EXTENSION_ID || 'NOT SET');
 
-  if (!EXTENSION_ID) {
-    console.log('[AUTH-SYNC] ⚠️ EXTENSION_ID not configured. Please set NEXT_PUBLIC_EXTENSION_ID in .env.local');
-    console.log('[AUTH-SYNC] To find your extension ID:');
-    console.log('[AUTH-SYNC] 1. Go to chrome://extensions/');
-    console.log('[AUTH-SYNC] 2. Enable Developer mode');
-    console.log('[AUTH-SYNC] 3. Find "FratGPT 2.0" and copy the ID');
-    console.log('[AUTH-SYNC] 4. Add to .env.local: NEXT_PUBLIC_EXTENSION_ID=your_id_here');
+  if (typeof window === 'undefined') {
+    console.log('[AUTH-SYNC] ❌ Window not available (SSR)');
     return;
   }
 
-  console.log('[AUTH-SYNC] typeof window:', typeof window);
-  console.log('[AUTH-SYNC] typeof chrome:', typeof (window as any).chrome);
+  try {
+    // Use window.postMessage to communicate with content script
+    // Content script acts as bridge to extension background
+    const message = token
+      ? { type: 'FRATGPT_SET_TOKEN', token }
+      : { type: 'FRATGPT_REMOVE_TOKEN' };
 
-  if (typeof window !== 'undefined' && typeof (window as any).chrome !== 'undefined') {
-    console.log('[AUTH-SYNC] ✓ Window and chrome are available');
-    const chromeRuntime = (window as any).chrome?.runtime;
-    console.log('[AUTH-SYNC] chromeRuntime:', chromeRuntime ? 'EXISTS' : 'UNDEFINED');
+    console.log('[AUTH-SYNC] 📤 Posting message to content script:', message.type);
+    console.log('[AUTH-SYNC] Token length:', token ? token.length : 0);
 
-    if (!chromeRuntime) {
-      console.log('[AUTH-SYNC] ❌ chrome.runtime not available');
-      return;
-    }
+    // Post message to same window - content script will relay to extension
+    window.postMessage(message, '*');
+    console.log('[AUTH-SYNC] ✅ Message posted to content script bridge');
 
-    try {
-      const message = token
-        ? { type: 'SET_TOKEN', token }
-        : { type: 'REMOVE_TOKEN' };
+    // Listen for response from content script
+    const responseListener = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
 
-      console.log('[AUTH-SYNC] 📤 Sending message to extension ID:', EXTENSION_ID);
-      console.log('[AUTH-SYNC] Message type:', message.type);
-
-      // Send message with extension ID - required when calling from webpage
-      chromeRuntime.sendMessage(EXTENSION_ID, message, (response: any) => {
-        if (chromeRuntime.lastError) {
-          console.log('[AUTH-SYNC] ⚠️ Extension not installed or not responding:', chromeRuntime.lastError.message);
+      if (event.data.type === 'FRATGPT_AUTH_RESPONSE') {
+        console.log('[AUTH-SYNC] 📬 Response from extension:', event.data);
+        if (event.data.success) {
+          console.log('[AUTH-SYNC] ✅ Extension successfully saved token!');
         } else {
-          console.log('[AUTH-SYNC] ✅ Extension acknowledged:', response);
+          console.log('[AUTH-SYNC] ⚠️ Extension error:', event.data.error || 'Unknown error');
         }
-      });
-    } catch (err) {
-      // Extension not installed - that's okay
-      console.log('[AUTH-SYNC] ❌ Error syncing with extension:', err);
-    }
-  } else {
-    console.log('[AUTH-SYNC] ❌ Not in browser or Chrome not available');
-    console.log('[AUTH-SYNC] Details - window undefined?', typeof window === 'undefined', ', chrome undefined?', typeof (window as any).chrome === 'undefined');
+        window.removeEventListener('message', responseListener);
+      }
+    };
+
+    window.addEventListener('message', responseListener);
+
+    // Timeout to remove listener if no response
+    setTimeout(() => {
+      window.removeEventListener('message', responseListener);
+    }, 5000);
+
+  } catch (err) {
+    console.log('[AUTH-SYNC] ❌ Error syncing with extension:', err);
   }
 }
 
