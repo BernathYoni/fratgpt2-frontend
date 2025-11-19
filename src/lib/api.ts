@@ -104,26 +104,44 @@ export class ApiClient {
     hasSubscription: boolean;
     plan: 'free' | 'basic' | 'pro';
   }>> {
-    return this.request<{
-      subscription?: any;
-      hasSubscription: boolean;
-      plan: 'free' | 'basic' | 'pro';
-    }>('/subscription/status', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    // Backend doesn't have /subscription/status - we get this from /auth/me
+    const meResponse = await this.getMe(token);
+    if (!meResponse.success || !meResponse.data?.user) {
+      return { success: false, error: 'Failed to get user data' };
+    }
+
+    const user = meResponse.data.user;
+    const subscription = user.subscription;
+    const plan = (subscription?.plan?.toLowerCase() || 'free') as 'free' | 'basic' | 'pro';
+
+    return {
+      success: true,
+      data: {
+        subscription,
+        hasSubscription: plan !== 'free',
+        plan,
+      },
+    };
   }
 
   async createCheckoutSession(token: string, plan: 'basic' | 'pro' | 'unlimited') {
-    return this.request<{ url: string }>('/subscription/create-checkout', {
+    // Map plan names to Stripe price IDs
+    const priceIds: Record<string, string> = {
+      basic: process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC || 'price_1SQdkDCDxzHnrj8R0nSwZApT',
+      pro: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || 'price_1SRQyxCDxzHnrj8RmTIm9ye6',
+      unlimited: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || 'price_1SRQyxCDxzHnrj8RmTIm9ye6',
+    };
+
+    return this.request<{ url: string }>('/billing/create-checkout-session', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ priceId: priceIds[plan] }),
     });
   }
 
   async getCustomerPortalUrl(token: string) {
-    return this.request<{ url: string }>('/subscription/portal', {
-      method: 'GET',
+    return this.request<{ url: string }>('/billing/create-portal-session', {
+      method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     });
   }
@@ -136,63 +154,65 @@ export class ApiClient {
   }
 
   async getSolveHistory(token: string, page: number = 1, limit: number = 50) {
-    return this.request(`/usage/history?page=${page}&limit=${limit}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    // Backend doesn't have history endpoint yet - skip onboarding and return empty for now
+    return {
+      success: true,
+      data: [],
+    };
   }
 
-  // Onboarding endpoints
+  // Onboarding endpoints - Backend doesn't have these, so skip onboarding flow
   async getOnboardingStatus(token: string): Promise<ApiResponse<{
     onboardingCompleted: boolean;
     onboardingStep: string;
     isMobileDevice: boolean;
   }>> {
-    return this.request<{
-      onboardingCompleted: boolean;
-      onboardingStep: string;
-      isMobileDevice: boolean;
-    }>('/onboarding/status', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    // Skip onboarding - mark as completed so users go straight to dashboard
+    return {
+      success: true,
+      data: {
+        onboardingCompleted: true,
+        onboardingStep: 'completed',
+        isMobileDevice: false,
+      },
+    };
   }
 
   async updateOnboardingStep(token: string, step: string): Promise<ApiResponse<{
     onboardingStep: string;
     onboardingCompleted: boolean;
   }>> {
-    return this.request<{
-      onboardingStep: string;
-      onboardingCompleted: boolean;
-    }>('/onboarding/update-step', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ step }),
-    });
+    return {
+      success: true,
+      data: {
+        onboardingStep: step,
+        onboardingCompleted: true,
+      },
+    };
   }
 
   async setDeviceType(token: string, isMobile: boolean): Promise<ApiResponse<{
     isMobileDevice: boolean;
   }>> {
-    return this.request<{
-      isMobileDevice: boolean;
-    }>('/onboarding/set-device', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ isMobile }),
-    });
+    return {
+      success: true,
+      data: {
+        isMobileDevice: isMobile,
+      },
+    };
   }
 
   async resetOnboarding(token: string): Promise<ApiResponse<{
     onboardingStep: string;
     onboardingCompleted: boolean;
   }>> {
-    return this.request<{
-      onboardingStep: string;
-      onboardingCompleted: boolean;
-    }>('/onboarding/reset', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    return {
+      success: true,
+      data: {
+        onboardingStep: 'completed',
+        onboardingCompleted: true,
+      },
+    };
   }
 }
 
