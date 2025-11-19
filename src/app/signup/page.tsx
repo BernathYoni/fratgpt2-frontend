@@ -186,11 +186,16 @@ function SignupContent() {
     }
 
     setLoading(true);
+    console.log('[SIGNUP] 📝 Starting signup process...');
+    console.log('[SIGNUP] Plan selected:', plan || 'NONE');
 
     try {
+      console.log('[SIGNUP] 🌐 Calling /auth/register API...');
       const registerRes = await api.register(email, password, firstName, lastName);
+      console.log('[SIGNUP] API response:', registerRes.success ? 'SUCCESS' : 'FAILED');
 
       if (!registerRes.success) {
+        console.error('[SIGNUP] ❌ Registration failed:', registerRes.error);
         // Handle specific error messages
         const errorMsg = registerRes.error || 'Failed to create account';
         if (errorMsg.toLowerCase().includes('already exists') || errorMsg.toLowerCase().includes('duplicate') || errorMsg.toLowerCase().includes('already registered')) {
@@ -206,8 +211,10 @@ function SignupContent() {
 
       // Register returns token directly - no need to login again!
       const token = registerRes.data?.token;
+      console.log('[SIGNUP] Token from register:', token ? `Received: ${token.substring(0, 20)}...` : 'MISSING!');
 
       if (!token) {
+        console.error('[SIGNUP] ❌ No token received from registration');
         setError('Account created but login failed. Please log in manually.');
         setLoading(false);
         setTimeout(() => router.push('/login'), 2000);
@@ -215,7 +222,9 @@ function SignupContent() {
       }
 
       // Save token - user is now logged in!
+      console.log('[SIGNUP] ✅ Account created successfully, saving token...');
       saveToken(token);
+      console.log('[SIGNUP] ✓ User is now logged in');
 
       // Clear stored plan from localStorage
       if (typeof window !== 'undefined') {
@@ -235,6 +244,7 @@ function SignupContent() {
 
       if (!plan) {
         // No plan selected - redirect to subscribe page to choose one
+        console.log('[SIGNUP] 🔀 No plan selected, redirecting to /subscribe...');
         // Small delay to ensure token is saved and auth events are processed
         await new Promise(resolve => setTimeout(resolve, 100));
         router.push('/subscribe');
@@ -243,20 +253,26 @@ function SignupContent() {
 
       if (plan === 'free') {
         // Free plan - go directly to dashboard
+        console.log('[SIGNUP] 🆓 Free plan selected, redirecting to dashboard...');
         router.push('/dashboard');
         return;
       }
 
       // Paid plan selected - redirect to Stripe checkout
+      console.log('[SIGNUP] 💳 Paid plan selected:', plan, '- Creating checkout session...');
       try {
         const checkoutRes = await api.createCheckoutSession(token, plan as 'basic' | 'pro' | 'unlimited');
+        console.log('[SIGNUP] Checkout response:', checkoutRes.success ? 'SUCCESS' : 'FAILED');
 
         if (!checkoutRes.success || !checkoutRes.data?.url) {
+          console.error('[SIGNUP] ❌ Checkout creation failed:', checkoutRes.error);
           setError('Failed to create checkout session. Please try again.');
           setLoading(false);
           return;
         }
 
+        console.log('[SIGNUP] ✓ Checkout URL received, redirecting to Stripe...');
+        console.log('[SIGNUP] Stripe URL:', checkoutRes.data.url);
         // Redirect to Stripe - they'll return to /subscription/success then dashboard
         window.location.href = checkoutRes.data.url;
       } catch (checkoutErr) {

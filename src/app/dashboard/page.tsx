@@ -24,13 +24,21 @@ export default function DashboardPage() {
   }, []);
 
   const loadData = async () => {
+    console.log('[DASHBOARD] 📊 Loading dashboard data...');
+
     const token = getToken();
+    console.log('[DASHBOARD] Checking auth token...');
+
     if (!token) {
+      console.error('[DASHBOARD] ❌ No token found! Redirecting to login...');
       router.push('/login');
       return;
     }
 
+    console.log('[DASHBOARD] ✓ Token found, loading user data...');
+
     try {
+      console.log('[DASHBOARD] 🌐 Fetching user, subscription, usage, and history...');
       const [userRes, subRes, usageRes, historyRes] = await Promise.all([
         api.getMe(token),
         api.getSubscriptionStatus(token),
@@ -38,14 +46,32 @@ export default function DashboardPage() {
         api.getSolveHistory(token),
       ]);
 
-      if (userRes.success) setUser(userRes.data);
-      if (subRes.success) setSubscription(subRes.data);
-      if (usageRes.success) setUsage(usageRes.data);
-      if (historyRes.success && historyRes.data) {
-        setHistory(Array.isArray(historyRes.data) ? historyRes.data : (historyRes.data as any).history || []);
+      console.log('[DASHBOARD] User response:', userRes.success ? 'SUCCESS' : 'FAILED');
+      console.log('[DASHBOARD] Subscription response:', subRes.success ? 'SUCCESS' : 'FAILED');
+      console.log('[DASHBOARD] Usage response:', usageRes.success ? 'SUCCESS' : 'FAILED');
+      console.log('[DASHBOARD] History response:', historyRes.success ? 'SUCCESS' : 'FAILED');
+
+      if (userRes.success) {
+        console.log('[DASHBOARD] ✓ User data loaded:', userRes.data?.user?.email);
+        setUser(userRes.data);
       }
+      if (subRes.success) {
+        console.log('[DASHBOARD] ✓ Subscription plan:', subRes.data?.plan);
+        setSubscription(subRes.data);
+      }
+      if (usageRes.success) {
+        console.log('[DASHBOARD] ✓ Usage stats loaded');
+        setUsage(usageRes.data);
+      }
+      if (historyRes.success && historyRes.data) {
+        const historyData = Array.isArray(historyRes.data) ? historyRes.data : (historyRes.data as any).history || [];
+        console.log('[DASHBOARD] ✓ History loaded, items:', historyData.length);
+        setHistory(historyData);
+      }
+
+      console.log('[DASHBOARD] ✅ Dashboard data loaded successfully');
     } catch (err) {
-      console.error('Failed to load dashboard data:', err);
+      console.error('[DASHBOARD] ❌ Failed to load dashboard data:', err);
     } finally {
       setLoading(false);
     }

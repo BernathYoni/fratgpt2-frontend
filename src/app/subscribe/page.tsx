@@ -21,18 +21,26 @@ function SubscribeContent() {
 
   useEffect(() => {
     async function fetchUserPlan() {
+      console.log('[SUBSCRIBE] 🔍 Checking user authentication...');
+
       if (!isAuthenticated()) {
+        console.log('[SUBSCRIBE] ❌ User NOT authenticated');
         setCurrentPlan(null);
         setIsLoading(false);
         return;
       }
 
+      console.log('[SUBSCRIBE] ✓ User IS authenticated');
       const token = getToken();
+
       if (!token) {
+        console.log('[SUBSCRIBE] ❌ No token found (unexpected!)');
         setCurrentPlan(null);
         setIsLoading(false);
         return;
       }
+
+      console.log('[SUBSCRIBE] 🌐 Fetching user subscription status...');
 
       // Fetch both subscription status and onboarding status
       const [subscriptionResponse, onboardingResponse] = await Promise.all([
@@ -41,25 +49,33 @@ function SubscribeContent() {
       ]);
 
       if (subscriptionResponse.success && subscriptionResponse.data) {
-        setCurrentPlan(subscriptionResponse.data.plan || 'free');
+        const plan = subscriptionResponse.data.plan || 'free';
+        console.log('[SUBSCRIBE] ✓ Current plan:', plan);
+        setCurrentPlan(plan);
       } else {
+        console.log('[SUBSCRIBE] ⚠️  No subscription data, defaulting to free');
         setCurrentPlan('free');
       }
 
       if (onboardingResponse.success && onboardingResponse.data) {
+        console.log('[SUBSCRIBE] Onboarding status:', onboardingResponse.data.onboardingCompleted ? 'COMPLETED' : 'NOT COMPLETED');
         setOnboardingCompleted(onboardingResponse.data.onboardingCompleted);
       }
 
       setIsLoading(false);
+      console.log('[SUBSCRIBE] ✓ User plan fetch complete');
     }
 
+    console.log('[SUBSCRIBE] 📍 Component mounted, fetching user plan...');
     fetchUserPlan();
 
     // Listen for auth changes (e.g., user just signed up)
     const handleAuthChange = (e: Event) => {
       const customEvent = e as CustomEvent;
+      console.log('[SUBSCRIBE] 🔔 Auth change event received:', customEvent.detail?.action);
       if (customEvent.detail?.action === 'login') {
         // User just logged in, re-fetch their plan
+        console.log('[SUBSCRIBE] 🔄 Re-fetching user plan after login...');
         fetchUserPlan();
       }
     };
@@ -69,8 +85,12 @@ function SubscribeContent() {
   }, []);
 
   const handlePlanClick = async (plan: 'free' | 'basic' | 'pro') => {
+    console.log('[SUBSCRIBE] 🎯 Plan clicked:', plan);
+
     // If not logged in, redirect to signup with plan pre-selected
+    console.log('[SUBSCRIBE] Checking authentication...');
     if (!isAuthenticated()) {
+      console.log('[SUBSCRIBE] ❌ User NOT logged in, redirecting to signup with plan...');
       // Clear any old stored plan first
       localStorage.removeItem('selected_plan');
       // Store new plan in localStorage for immediate access after signup
@@ -134,18 +154,27 @@ function SubscribeContent() {
     }
 
     // UPGRADE: Create Stripe checkout session
+    console.log('[SUBSCRIBE] ✓ User IS logged in, creating checkout session...');
     setIsUpgrading(true);
     const token = getToken();
+
     if (!token) {
+      console.error('[SUBSCRIBE] ❌ No token found (unexpected for authenticated user!)');
       localStorage.setItem('selected_plan', plan);
       router.push(`/signup?plan=${plan}`);
       return;
     }
 
+    console.log('[SUBSCRIBE] 🌐 Calling createCheckoutSession API...');
     const response = await api.createCheckoutSession(token, plan);
+    console.log('[SUBSCRIBE] Checkout response:', response.success ? 'SUCCESS' : 'FAILED');
+
     if (response.success && response.data?.url) {
+      console.log('[SUBSCRIBE] ✓ Redirecting to Stripe checkout...');
+      console.log('[SUBSCRIBE] Stripe URL:', response.data.url);
       window.location.href = response.data.url;
     } else {
+      console.error('[SUBSCRIBE] ❌ Checkout failed:', response.error);
       alert(response.error || 'Failed to start checkout. Please try again.');
       setIsUpgrading(false);
     }

@@ -40,32 +40,48 @@ function syncTokenWithExtension(token: string | null) {
 
 export function saveToken(token: string) {
   if (typeof window !== 'undefined') {
+    console.log('[AUTH] 🔐 Saving token:', token.substring(0, 20) + '...');
     localStorage.setItem('authToken', token);
+    console.log('[AUTH] ✓ Token saved to localStorage');
+
     // Sync with extension
     syncTokenWithExtension(token);
+    console.log('[AUTH] ✓ Extension sync initiated');
+
     // Dispatch event so Navigation and other components know user logged in
     window.dispatchEvent(new CustomEvent('fratgpt-auth-change', { detail: { action: 'login' } }));
+    console.log('[AUTH] ✓ Login event dispatched');
   }
 }
 
 export function getToken(): string | null {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
+    console.log('[AUTH] 🔍 Getting token:', token ? `Found: ${token.substring(0, 20)}...` : 'NOT FOUND');
+    return token;
   }
   return null;
 }
 
 export function removeToken() {
   if (typeof window !== 'undefined') {
+    console.log('[AUTH] 🚪 Removing token - logging out');
     localStorage.removeItem('authToken');
     localStorage.removeItem('cachedUser');
+    console.log('[AUTH] ✓ Token and cached user removed');
+
     // Sync logout with extension
     syncTokenWithExtension(null);
+    console.log('[AUTH] ✓ Extension logout sync initiated');
+
     // Dispatch event so Navigation and other components know user logged out
     window.dispatchEvent(new CustomEvent('fratgpt-auth-change', { detail: { action: 'logout' } }));
+    console.log('[AUTH] ✓ Logout event dispatched');
   }
 }
 
 export function isAuthenticated(): boolean {
-  return getToken() !== null;
+  const hasToken = getToken() !== null;
+  console.log('[AUTH] 🔐 isAuthenticated check:', hasToken ? 'YES' : 'NO');
+  return hasToken;
 }

@@ -14,16 +14,25 @@ function SuccessContent() {
 
   useEffect(() => {
     async function handleSuccess() {
+      console.log('[SUCCESS] 🎉 Payment success page loaded');
+      console.log('[SUCCESS] Session ID:', sessionId || 'NONE');
+
       const token = getToken();
+      console.log('[SUCCESS] Checking auth token...');
 
       if (!token) {
+        console.error('[SUCCESS] ❌ No token found! Redirecting to login...');
         router.push('/login');
         return;
       }
 
+      console.log('[SUCCESS] ✓ Token found, user is authenticated');
+      console.log('[SUCCESS] ⏳ Waiting 2s for Stripe webhook to process...');
+
       // Wait for webhook to process (give Stripe time to update subscription)
       await new Promise(resolve => setTimeout(resolve, 2000));
 
+      console.log('[SUCCESS] ✓ Wait complete, redirecting to dashboard...');
       // Redirect to dashboard - payment successful!
       router.push('/dashboard');
     }
