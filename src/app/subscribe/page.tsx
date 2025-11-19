@@ -21,28 +21,22 @@ function SubscribeContent() {
 
   useEffect(() => {
     async function fetchUserPlan() {
+      // Small delay to ensure token from signup is saved
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       console.log('[SUBSCRIBE] 🔍 Checking user authentication...');
       console.log('[SUBSCRIBE] localStorage authToken on page load:', localStorage.getItem('authToken') ? 'EXISTS' : 'MISSING');
 
-      if (!isAuthenticated()) {
-        console.log('[SUBSCRIBE] ❌ User NOT authenticated');
-        setCurrentPlan(null);
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('[SUBSCRIBE] ✓ User IS authenticated');
       const token = getToken();
 
       if (!token) {
-        console.log('[SUBSCRIBE] ❌ No token found (unexpected!)');
+        console.log('[SUBSCRIBE] ❌ No token found, user not logged in');
         setCurrentPlan(null);
         setIsLoading(false);
         return;
       }
 
       console.log('[SUBSCRIBE] ✓ Token found:', token.substring(0, 20) + '...');
-
       console.log('[SUBSCRIBE] 🌐 Fetching user subscription status...');
 
       // Fetch subscription status only
