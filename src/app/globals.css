@@ -21,3 +21,17 @@ html {
 body {
   @apply bg-background text-text-primary antialiased;
 }
+
+/* Pencil underline animation */
+.pencil-underline path {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: drawUnderline 1.5s ease-out forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes drawUnderline {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

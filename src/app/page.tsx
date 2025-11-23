@@ -27,7 +27,24 @@ export default function HomePage() {
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">
                 <span className="text-text-primary">Your Best</span>
                 <br />
-                <span className="text-accent">AI Homework Helper</span>
+                <span className="relative inline-block text-accent">
+                  AI Homework Helper
+                  <svg
+                    className="absolute left-0 -bottom-2 w-full h-4 pencil-underline"
+                    viewBox="0 0 300 12"
+                    preserveAspectRatio="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5,9 Q50,3 95,7 T185,8 Q235,5 295,8"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      className="text-accent opacity-70"
+                    />
+                  </svg>
+                </span>
                 <br />
                 <span className="text-text-primary">Extension</span>
               </h1>
