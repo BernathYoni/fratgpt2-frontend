@@ -31,31 +31,60 @@ export default function AdminDashboardPage() {
 
   const loadStats = async () => {
     const token = getToken();
-    if (!token) return;
+    console.log('[ADMIN-DASHBOARD] Starting loadStats...');
+    console.log('[ADMIN-DASHBOARD] Token exists:', !!token);
+
+    if (!token) {
+      console.log('[ADMIN-DASHBOARD] No token, returning early');
+      return;
+    }
 
     try {
       setLoading(true);
       setError(null);
 
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.fratgpt.co';
+      const fullUrl = `${apiUrl}/admin/stats`;
+      console.log('[ADMIN-DASHBOARD] Fetching from:', fullUrl);
+
       // Call the admin stats API endpoint
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.fratgpt.co'}/admin/stats`, {
+      const response = await fetch(fullUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
+      console.log('[ADMIN-DASHBOARD] Response status:', response.status);
+      console.log('[ADMIN-DASHBOARD] Response ok:', response.ok);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Failed to load stats' }));
+        console.log('[ADMIN-DASHBOARD] Error response data:', errorData);
         throw new Error(errorData.error || 'Failed to load stats');
       }
 
       const data = await response.json();
+      console.log('[ADMIN-DASHBOARD] Response data:', JSON.stringify(data, null, 2));
+      console.log('[ADMIN-DASHBOARD] Data type:', typeof data);
+      console.log('[ADMIN-DASHBOARD] Data keys:', Object.keys(data));
+      console.log('[ADMIN-DASHBOARD] Has totalCost:', 'totalCost' in data);
+      console.log('[ADMIN-DASHBOARD] Has models:', 'models' in data);
+      console.log('[ADMIN-DASHBOARD] Models is array:', Array.isArray(data.models));
+
+      if (data.models) {
+        console.log('[ADMIN-DASHBOARD] Models length:', data.models.length);
+        console.log('[ADMIN-DASHBOARD] First model:', data.models[0]);
+      }
+
       setStats(data);
+      console.log('[ADMIN-DASHBOARD] Stats set successfully');
     } catch (err) {
-      console.error('[ADMIN] Failed to load stats:', err);
+      console.error('[ADMIN-DASHBOARD] Failed to load stats:', err);
+      console.error('[ADMIN-DASHBOARD] Error stack:', err instanceof Error ? err.stack : 'No stack');
       setError(err instanceof Error ? err.message : 'Failed to load stats');
     } finally {
       setLoading(false);
+      console.log('[ADMIN-DASHBOARD] Loading complete');
     }
   };
 
@@ -136,6 +165,8 @@ export default function AdminDashboardPage() {
     return tokens.toLocaleString();
   };
 
+  console.log('[ADMIN-DASHBOARD] Rendering with stats:', stats);
+
   return (
     <div>
       {/* Total Cost Card */}
@@ -157,6 +188,7 @@ export default function AdminDashboardPage() {
       {/* Model Stats Grid */}
       <div className="grid md:grid-cols-2 gap-6">
         {stats.models.map((model) => {
+          console.log('[ADMIN-DASHBOARD] Rendering model:', model);
           const config = modelConfig[model.model] || {
             icon: Bot,
             color: 'text-accent',
