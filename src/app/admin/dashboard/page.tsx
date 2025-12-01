@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '../../components/ui/Card';
 import { api } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { Sparkles, Zap, Bot, Brain, DollarSign } from 'lucide-react';
+import { Sparkles, Zap, Bot, Brain, DollarSign, RotateCcw } from 'lucide-react';
 
 interface ModelStats {
   model: string;
@@ -24,6 +24,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -85,6 +86,41 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
       console.log('[ADMIN-DASHBOARD] Loading complete');
+    }
+  };
+
+  const handleReset = async () => {
+    if (!confirm('⚠️ Are you sure you want to reset ALL usage and stats data? This will delete all AdminStats and Usage records. This action cannot be undone!')) {
+      return;
+    }
+
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      setResetting(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.fratgpt.co';
+
+      const response = await fetch(`${apiUrl}/admin/reset-stats`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to reset stats' }));
+        throw new Error(errorData.error || 'Failed to reset stats');
+      }
+
+      // Reload stats after reset
+      await loadStats();
+      alert('✅ All stats have been reset successfully!');
+    } catch (err) {
+      console.error('[ADMIN-DASHBOARD] Failed to reset stats:', err);
+      alert('❌ Failed to reset stats: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -169,6 +205,18 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
+      {/* Reset Button */}
+      <div className="mb-6 flex justify-end">
+        <button
+          onClick={handleReset}
+          disabled={resetting}
+          className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 rounded-lg text-red-500 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RotateCcw className={`w-4 h-4 ${resetting ? 'animate-spin' : ''}`} />
+          {resetting ? 'Resetting...' : 'Reset All Stats'}
+        </button>
+      </div>
+
       {/* Total Cost Card */}
       <Card className="mb-8 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 border-orange-500/30">
         <div className="flex items-center gap-6">
