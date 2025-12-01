@@ -6,13 +6,14 @@ import { useRouter } from 'next/navigation';
 import { Button } from './ui/Button';
 import { removeToken } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { Menu, X, ChevronDown, Settings, History, LogOut } from 'lucide-react';
+import { Menu, X, ChevronDown, Settings, History, LogOut, Shield } from 'lucide-react';
 
 interface UserData {
   id: string;
   email: string;
   first_name?: string;
   last_name?: string;
+  role?: 'USER' | 'ADMIN';
 }
 
 export function Navigation() {
@@ -208,7 +209,20 @@ export function Navigation() {
 
                   {/* Dropdown Menu */}
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-xl shadow-xl py-2 z-50">
+                    <div className="absolute right-0 mt-2 w-56 bg-surface border border-border rounded-xl shadow-xl py-2 z-50">
+                      {user.role === 'ADMIN' && (
+                        <>
+                          <Link
+                            href="/admin/dashboard"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center space-x-3 px-4 py-2.5 text-text-primary bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border-b border-orange-500/20 hover:from-orange-500/20 hover:to-yellow-500/20 transition-colors"
+                          >
+                            <Shield className="w-5 h-5 text-accent" />
+                            <span className="font-semibold text-accent">Admin Dashboard</span>
+                          </Link>
+                          <div className="border-t border-border my-2"></div>
+                        </>
+                      )}
                       <Link
                         href="/settings"
                         onClick={() => setDropdownOpen(false)}
@@ -294,6 +308,16 @@ export function Navigation() {
                 >
                   Dashboard
                 </Link>
+                {user.role === 'ADMIN' && (
+                  <Link
+                    href="/admin/dashboard"
+                    className="flex items-center space-x-3 px-4 py-2 rounded-md text-base font-medium bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/30 text-accent hover:border-orange-500/50 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Shield className="w-5 h-5" />
+                    <span>Admin Dashboard</span>
+                  </Link>
+                )}
                 <Link
                   href="/settings"
                   className="flex items-center space-x-3 text-base text-text-secondary hover:text-text-primary transition-colors py-2"

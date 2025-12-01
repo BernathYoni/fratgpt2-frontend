@@ -293,8 +293,8 @@ function SubscribeContent() {
               </div>
 
               <ul className="space-y-2.5 mb-5 flex-grow">
-                <PlanFeature text="20 snips/screens per day" />
-                <PlanFeature text="Snip & Screen modes" />
+                <PlanFeature text="20 solves per month" />
+                <PlanFeature text="Fast & Regular modes" />
                 <PlanFeature text="Step-by-step explanations" />
                 <PlanFeature text="Basic support" />
               </ul>
@@ -318,8 +318,8 @@ function SubscribeContent() {
               </div>
 
               <ul className="space-y-2.5 mb-5 flex-grow">
-                <PlanFeature text="50 snips/screens per day" highlighted />
-                <PlanFeature text="Snip & Screen modes" />
+                <PlanFeature text="Usage-based limit (~$4/month)" highlighted />
+                <PlanFeature text="Fast & Regular modes only" />
                 <PlanFeature text="Step-by-step explanations" />
                 <PlanFeature text="Follow-up questions" />
                 <PlanFeature text="Solve history" />
@@ -344,15 +344,16 @@ function SubscribeContent() {
               <div className="mb-5">
                 <h2 className="text-xl font-bold mb-2">Pro</h2>
                 <div className="mb-2">
-                  <span className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-pink-500 bg-clip-text text-transparent">$19.99</span>
+                  <span className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-pink-500 bg-clip-text text-transparent">$20</span>
                   <span className="text-text-secondary text-sm">/month</span>
                 </div>
                 <p className="text-text-secondary text-sm">For serious students</p>
               </div>
 
               <ul className="space-y-2.5 mb-5 flex-grow">
-                <PlanFeature text="Unlimited snips/screens" highlighted />
-                <PlanFeature text="Snip & Screen modes" />
+                <PlanFeature text="Usage-based limit (~$16/month)" highlighted />
+                <PlanFeature text="All modes (Fast, Regular, Expert)" highlighted />
+                <PlanFeature text="Multi-LLM consensus answers" highlighted />
                 <PlanFeature text="Step-by-step explanations" />
                 <PlanFeature text="Follow-up questions" />
                 <PlanFeature text="Solve history" />
@@ -379,8 +380,8 @@ function SubscribeContent() {
               answer="Yes! Cancel your subscription anytime from your dashboard. No questions asked, no cancellation fees."
             />
             <FAQItem
-              question="What counts as a snip or screen?"
-              answer="Each time you use the snip mode to select a problem or screen mode to capture a page, it counts as one use towards your daily limit."
+              question="How does usage-based pricing work?"
+              answer="Basic and Pro plans use actual AI costs. Free plan has 20 solves/month. Basic stops at $4 in AI costs (~$5 plan), Pro stops at $16 (~$20 plan). You only pay for what you use!"
             />
             <FAQItem
               question="Do you offer refunds?"
