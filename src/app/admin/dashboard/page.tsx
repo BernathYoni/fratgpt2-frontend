@@ -6,7 +6,7 @@ import { getToken } from '@/lib/auth';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Search, DollarSign, Activity, Users, BarChart2, Calendar } from 'lucide-react';
+import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield } from 'lucide-react';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
 type Tab = 'cost' | 'usage';
@@ -138,6 +138,19 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Admin Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-gradient-to-br from-pink-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center border-2 border-orange-500/30">
+            <Shield className="w-6 h-6 text-orange-500" />
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+            Admin Dashboard
+          </h1>
+        </div>
+        <p className="text-text-secondary">Monitor and analyze FratGPT usage and costs</p>
+      </div>
+
       {/* Controls Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-paper p-4 rounded-xl border border-border">
         {/* Tab Switcher */}
