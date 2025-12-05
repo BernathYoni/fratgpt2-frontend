@@ -6,7 +6,7 @@ import { getToken } from '@/lib/auth';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard } from 'lucide-react';
+import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2 } from 'lucide-react';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
 type Tab = 'cost' | 'usage';
@@ -25,6 +25,9 @@ export default function AdminDashboard() {
   const [userResult, setUserResult] = useState<any>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState('');
+
+  // Reset stats state
+  const [resetting, setResetting] = useState(false);
 
   // Calculate date range based on timeframe
   const getDateRange = (period: Timeframe) => {
@@ -123,6 +126,31 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleResetStats = async () => {
+    if (!confirm('⚠️ DANGER: This will wipe ALL usage and cost statistics from the database. This cannot be undone.\n\nAre you sure you want to reset all stats?')) {
+      return;
+    }
+
+    setResetting(true);
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const res = await api.resetStats(token);
+      if (res.success) {
+        alert('Stats reset successfully.');
+        fetchData(); // Refresh data
+      } else {
+        alert('Failed to reset stats: ' + res.error);
+      }
+    } catch (err) {
+      console.error('Reset failed:', err);
+      alert('An error occurred while resetting stats.');
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('en-US', { 
       style: 'currency', 
@@ -174,6 +202,17 @@ export default function AdminDashboard() {
           >
             <Users className="w-5 h-5" />
             Usage & Users
+          </button>
+
+          <div className="h-px bg-border my-2" />
+
+          <button
+            onClick={handleResetStats}
+            disabled={resetting}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
+          >
+            <Trash2 className="w-5 h-5" />
+            {resetting ? 'Resetting...' : 'Reset Daily Stats'}
           </button>
         </div>
       </div>

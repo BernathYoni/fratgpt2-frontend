@@ -251,6 +251,16 @@ export class ApiClient {
       headers: { Authorization: `Bearer ${token}` },
     });
   }
+
+  async resetStats(token: string) {
+    return this.request<{
+      deletedAdminStats: number;
+      deletedUsage: number;
+    }>('/admin/reset-stats', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
 }
 
 export const api = new ApiClient();
