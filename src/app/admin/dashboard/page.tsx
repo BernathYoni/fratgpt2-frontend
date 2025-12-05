@@ -476,30 +476,57 @@ export default function AdminDashboard() {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-6 border-b border-border">
                       <div>
                         <h4 className="text-xl font-bold text-text-primary">{userResult.user.email}</h4>
-                                            <p className="text-text-secondary text-sm">User ID: {userResult.user.id}</p>
+                                                                <p className="text-text-secondary text-sm">User ID: {userResult.user.id}</p>
+                                                                
+                                                                {/* Subscription History Badge */}
+                                                                <div className="mt-4 flex flex-wrap gap-2">
+                                                                  {userResult.user.subscriptionHistory?.map((sub: any, idx: number) => (
+                                                                    <div key={idx} className={`px-3 py-1.5 rounded-lg text-xs border ${
+                                                                      sub.status === 'ACTIVE' 
+                                                                        ? 'bg-green-500/10 text-green-500 border-green-500/20' 
+                                                                        : 'bg-surface-paper text-text-secondary border-border'
+                                                                    }`}>
+                                                                      <span className="font-bold">{sub.plan}</span>
+                                                                      <span className="mx-1">•</span>
+                                                                      <span>{sub.durationMonths} mo</span>
+                                                                      {sub.status === 'ACTIVE' && <span className="ml-1 text-[10px] uppercase bg-green-500 text-white px-1 rounded">Current</span>}
+                                                                    </div>
+                                                                  ))}
+                                                                </div>
+                                                              </div>
+                                                              <div className="flex flex-col items-end gap-4 mt-4 md:mt-0">
+                                                                {/* Financials */}
+                                                                <div className="flex items-center gap-6 text-right">
+                                                                  <div>
+                                                                    <p className="text-sm text-text-secondary mb-1">Est. Revenue</p>
+                                                                    <p className="text-lg font-semibold text-text-primary">{formatCurrency(userResult.estimatedRevenue)}</p>
+                                                                  </div>
+                                                                  <div>
+                                                                    <p className="text-sm text-text-secondary mb-1">Total Cost</p>
+                                                                    <p className="text-2xl font-bold text-primary">{formatCurrency(userResult.totalCost)}</p>
+                                                                  </div>
+                                                                </div>
                                             
-                                            {/* Subscription History Badge */}
-                                            <div className="mt-4 flex flex-wrap gap-2">
-                                              {userResult.user.subscriptionHistory?.map((sub: any, idx: number) => (
-                                                <div key={idx} className={`px-3 py-1.5 rounded-lg text-xs border ${
-                                                  sub.status === 'ACTIVE' 
-                                                    ? 'bg-green-500/10 text-green-500 border-green-500/20' 
-                                                    : 'bg-surface-paper text-text-secondary border-border'
-                                                }`}>
-                                                  <span className="font-bold">{sub.plan}</span>
-                                                  <span className="mx-1">•</span>
-                                                  <span>{sub.durationMonths} mo</span>
-                                                  {sub.status === 'ACTIVE' && <span className="ml-1 text-[10px] uppercase bg-green-500 text-white px-1 rounded">Current</span>}
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </div>
-                                          <div className="text-right mt-4 md:mt-0">                        <p className="text-sm text-text-secondary">Total User Cost</p>
-                        <p className="text-3xl font-bold text-primary">{formatCurrency(userResult.totalCost)}</p>
-                      </div>
-                    </div>
-
-                    <h5 className="text-sm font-medium text-text-secondary mb-4 uppercase tracking-wider">Cost Breakdown</h5>
+                                                                {/* Margin Badge */}
+                                                                {userResult.estimatedRevenue > 0 ? (
+                                                                   <div className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                                                                     userResult.costToRevenuePercentage > 100 
+                                                                       ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                                       : userResult.costToRevenuePercentage > 80
+                                                                         ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                                         : 'bg-green-500/10 text-green-500 border-green-500/20'
+                                                                   }`}>
+                                                                     {userResult.costToRevenuePercentage.toFixed(1)}% Cost Ratio
+                                                                   </div>
+                                                                ) : (
+                                                                  <div className="px-3 py-1 rounded-full text-xs font-bold bg-surface-paper text-text-secondary border border-border">
+                                                                    No Revenue (Free)
+                                                                  </div>
+                                                                )}
+                                                              </div>
+                                                            </div>
+                                            
+                                                            <h5 className="text-sm font-medium text-text-secondary mb-4 uppercase tracking-wider">Cost Breakdown</h5>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* User - Gemini */}
                       <div className="p-4 bg-surface-paper rounded-lg border border-border relative overflow-hidden">

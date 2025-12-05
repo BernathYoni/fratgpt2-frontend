@@ -253,6 +253,8 @@ export class ApiClient {
         }>;
       };
       totalCost: number;
+      estimatedRevenue: number;
+      costToRevenuePercentage: number;
       providers: {
         gemini: { cost: number; percentage: number };
         openai: { cost: number; percentage: number };
