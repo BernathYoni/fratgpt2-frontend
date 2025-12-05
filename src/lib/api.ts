@@ -259,6 +259,7 @@ export class ApiClient {
     }>('/admin/reset-stats', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({}),
     });
   }
 }
