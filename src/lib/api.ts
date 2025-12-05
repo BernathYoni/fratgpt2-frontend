@@ -78,9 +78,10 @@ export class ApiClient {
       email: string;
       first_name?: string;
       last_name?: string;
-      subscription?: any;
-      plan?: string;
-      usage?: any;
+      role?: 'USER' | 'ADMIN';
+      plan?: 'FREE' | 'BASIC' | 'PRO'; // Add plan to top-level user object
+      subscriptionStatus?: string;
+      currentPeriodEnd?: string;
     }
   }>> {
     return this.request<{
@@ -89,9 +90,10 @@ export class ApiClient {
         email: string;
         first_name?: string;
         last_name?: string;
-        subscription?: any;
-        plan?: string;
-        usage?: any;
+        role?: 'USER' | 'ADMIN';
+        plan?: 'FREE' | 'BASIC' | 'PRO';
+        subscriptionStatus?: string;
+        currentPeriodEnd?: string;
       }
     }>('/auth/me', {
       headers: { Authorization: `Bearer ${token}` },
@@ -100,9 +102,10 @@ export class ApiClient {
 
   // Subscription endpoints
   async getSubscriptionStatus(token: string): Promise<ApiResponse<{
-    subscription?: any;
     hasSubscription: boolean;
     plan: 'free' | 'basic' | 'pro';
+    status?: string;
+    currentPeriodEnd?: string;
   }>> {
     // Backend doesn't have /subscription/status - we get this from /auth/me
     const meResponse = await this.getMe(token);
@@ -111,15 +114,19 @@ export class ApiClient {
     }
 
     const user = meResponse.data.user;
-    const subscription = user.subscription;
-    const plan = (subscription?.plan?.toLowerCase() || 'free') as 'free' | 'basic' | 'pro';
+    
+    // Use the plan field directly from the user object (which comes from the backend logic)
+    const plan = (user.plan?.toLowerCase() || 'free') as 'free' | 'basic' | 'pro';
+    const status = user.subscriptionStatus;
+    const currentPeriodEnd = user.currentPeriodEnd;
 
     return {
       success: true,
       data: {
-        subscription,
         hasSubscription: plan !== 'free',
         plan,
+        status,
+        currentPeriodEnd
       },
     };
   }
