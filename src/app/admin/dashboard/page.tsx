@@ -476,10 +476,25 @@ export default function AdminDashboard() {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-6 border-b border-border">
                       <div>
                         <h4 className="text-xl font-bold text-text-primary">{userResult.user.email}</h4>
-                        <p className="text-text-secondary text-sm">User ID: {userResult.user.id}</p>
-                      </div>
-                      <div className="text-right mt-4 md:mt-0">
-                        <p className="text-sm text-text-secondary">Total User Cost</p>
+                                            <p className="text-text-secondary text-sm">User ID: {userResult.user.id}</p>
+                                            
+                                            {/* Subscription History Badge */}
+                                            <div className="mt-4 flex flex-wrap gap-2">
+                                              {userResult.user.subscriptionHistory?.map((sub: any, idx: number) => (
+                                                <div key={idx} className={`px-3 py-1.5 rounded-lg text-xs border ${
+                                                  sub.status === 'ACTIVE' 
+                                                    ? 'bg-green-500/10 text-green-500 border-green-500/20' 
+                                                    : 'bg-surface-paper text-text-secondary border-border'
+                                                }`}>
+                                                  <span className="font-bold">{sub.plan}</span>
+                                                  <span className="mx-1">•</span>
+                                                  <span>{sub.durationMonths} mo</span>
+                                                  {sub.status === 'ACTIVE' && <span className="ml-1 text-[10px] uppercase bg-green-500 text-white px-1 rounded">Current</span>}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                          <div className="text-right mt-4 md:mt-0">                        <p className="text-sm text-text-secondary">Total User Cost</p>
                         <p className="text-3xl font-bold text-primary">{formatCurrency(userResult.totalCost)}</p>
                       </div>
                     </div>

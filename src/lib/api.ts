@@ -240,7 +240,18 @@ export class ApiClient {
 
   async searchUserUsage(token: string, email: string, startDate: string, endDate: string) {
     return this.request<{
-      user: { id: string; email: string; createdAt: string };
+      user: { 
+        id: string; 
+        email: string; 
+        createdAt: string;
+        subscriptionHistory: Array<{
+          plan: string;
+          status: string;
+          startDate: string;
+          endDate: string | null;
+          durationMonths: string;
+        }>;
+      };
       totalCost: number;
       providers: {
         gemini: { cost: number; percentage: number };
