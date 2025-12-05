@@ -214,6 +214,43 @@ export class ApiClient {
       },
     };
   }
+
+  // Admin endpoints
+  async getAdminFinancials(token: string, startDate: string, endDate: string) {
+    return this.request<{
+      totalCost: number;
+      providers: {
+        gemini: { cost: number; percentage: number; inputTokens: number; outputTokens: number };
+        openai: { cost: number; percentage: number; inputTokens: number; outputTokens: number };
+        claude: { cost: number; percentage: number; inputTokens: number; outputTokens: number; thinkingTokens?: number };
+      };
+    }>(`/admin/financials?startDate=${startDate}&endDate=${endDate}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async getAdminMetrics(token: string, startDate: string, endDate: string) {
+    return this.request<{
+      totalSolves: number;
+      totalSnips: number;
+    }>(`/admin/metrics?startDate=${startDate}&endDate=${endDate}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async searchUserUsage(token: string, email: string, startDate: string, endDate: string) {
+    return this.request<{
+      user: { id: string; email: string; createdAt: string };
+      totalCost: number;
+      providers: {
+        gemini: { cost: number; percentage: number };
+        openai: { cost: number; percentage: number };
+        claude: { cost: number; percentage: number };
+      };
+    }>(`/admin/user-search?email=${encodeURIComponent(email)}&startDate=${startDate}&endDate=${endDate}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
 }
 
 export const api = new ApiClient();
