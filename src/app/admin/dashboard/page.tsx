@@ -445,6 +445,8 @@ export default function AdminDashboard() {
                         <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Role</th>
                         <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Plan</th>
                         <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Member Since</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Usage (Month)</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Usage (Avg)</th>
                         <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Solves</th>
                         <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Lifetime Cost</th>
                       </tr>
@@ -484,6 +486,18 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-4 px-6 text-sm text-text-secondary">
                             {formatDate(user.createdAt)}
+                          </td>
+                          <td className="text-right py-4 px-6">
+                            <span className={`text-xs font-bold px-2 py-1 rounded ${
+                              user.usageThisMonthPercent >= 90 ? 'bg-red-500/10 text-red-500' :
+                              user.usageThisMonthPercent >= 50 ? 'bg-yellow-500/10 text-yellow-500' :
+                              'bg-green-500/10 text-green-500'
+                            }`}>
+                              {user.usageThisMonthPercent.toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="text-right py-4 px-6 text-sm font-mono text-text-secondary">
+                            {user.averageMonthlyUsagePercent.toFixed(1)}%
                           </td>
                           <td className="text-right py-4 px-6 text-sm font-mono text-text-primary">
                             {formatNumber(user.lifetimeSolves)}

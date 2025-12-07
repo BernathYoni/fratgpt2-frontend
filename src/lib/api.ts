@@ -283,6 +283,8 @@ export class ApiClient {
         planSince: string;
         lifetimeCost: number;
         lifetimeSolves: number;
+        usageThisMonthPercent: number;
+        averageMonthlyUsagePercent: number;
       }>;
       pagination: {
         total: number;
