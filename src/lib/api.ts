@@ -279,6 +279,9 @@ export class ApiClient {
         createdAt: string;
         user: { id: string; email: string };
         mode: string;
+        sourceUrl?: string;
+        ipAddress?: string;
+        interactions?: any[];
         input: { text: string; images: Array<{ id: string; source: string; hasImage: boolean }> };
         outputs: Array<{
           id: string;

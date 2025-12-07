@@ -694,8 +694,28 @@ export default function AdminDashboard() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                   {/* Input Section */}
                                   <div>
-                                    <h4 className="text-sm font-bold text-text-secondary mb-2 uppercase tracking-wider">Input</h4>
+                                    <h4 className="text-sm font-bold text-text-secondary mb-2 uppercase tracking-wider">Input & Context</h4>
                                     <div className="bg-surface p-4 rounded-lg border border-border">
+                                      <div className="mb-4 pb-4 border-b border-border">
+                                        <div className="grid grid-cols-2 gap-2 text-xs mb-2">
+                                           <div>
+                                             <span className="text-text-secondary block">IP Address</span>
+                                             <span className="font-mono text-text-primary">{log.ipAddress || 'N/A'}</span>
+                                           </div>
+                                           <div>
+                                             <span className="text-text-secondary block">Interactions</span>
+                                             <span className="font-mono text-text-primary">{log.interactions?.length || 0} events</span>
+                                           </div>
+                                        </div>
+                                        {log.sourceUrl && (
+                                          <div className="text-xs">
+                                            <span className="text-text-secondary block">Source URL</span>
+                                            <a href={log.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate block">
+                                              {log.sourceUrl}
+                                            </a>
+                                          </div>
+                                        )}
+                                      </div>
                                       <p className="text-text-primary whitespace-pre-wrap text-sm">{log.input.text}</p>
                                       {log.input.images.map((img: any) => (
                                         <div key={img.id} className="mt-2 text-xs text-text-secondary flex items-center gap-2">
