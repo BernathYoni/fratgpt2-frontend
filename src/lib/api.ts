@@ -272,6 +272,34 @@ export class ApiClient {
     });
   }
 
+  async getAdminLogs(token: string, page: number = 1, limit: number = 50) {
+    return this.request<{
+      logs: Array<{
+        id: string;
+        createdAt: string;
+        user: { id: string; email: string };
+        mode: string;
+        input: { text: string; images: Array<{ id: string; source: string; hasImage: boolean }> };
+        outputs: Array<{
+          id: string;
+          provider: string;
+          shortAnswer: string;
+          confidence: number | null;
+          structuredAnswer: any;
+          metadata: any;
+        }>;
+      }>;
+      pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+    }>(`/admin/logs?page=${page}&limit=${limit}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
   async resetStats(token: string) {
     return this.request<{
       deletedAdminStats: number;

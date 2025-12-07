@@ -6,10 +6,10 @@ import { getToken } from '@/lib/auth';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2 } from 'lucide-react';
+import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
-type Tab = 'cost' | 'usage';
+type Tab = 'cost' | 'usage' | 'logs';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('cost');
@@ -19,6 +19,9 @@ export default function AdminDashboard() {
   // Data states
   const [financials, setFinancials] = useState<any>(null);
   const [metrics, setMetrics] = useState<any>(null);
+  const [logsData, setLogsData] = useState<any>(null);
+  const [logsPage, setLogsPage] = useState(1);
+  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   
   // User search states
   const [searchEmail, setSearchEmail] = useState('');
@@ -79,7 +82,7 @@ export default function AdminDashboard() {
         if (res.success) {
           setFinancials(res.data);
         }
-      } else {
+      } else if (activeTab === 'usage') {
         // Fetch metrics
         const metricsRes = await api.getAdminMetrics(token, startDate, endDate);
         if (metricsRes.success) {
@@ -89,6 +92,11 @@ export default function AdminDashboard() {
         // If there's a user search active, re-fetch it for new timeframe
         if (userResult && searchEmail) {
           handleUserSearch(searchEmail);
+        }
+      } else if (activeTab === 'logs') {
+        const res = await api.getAdminLogs(token, logsPage, 50);
+        if (res.success) {
+          setLogsData(res.data);
         }
       }
     } catch (err) {
@@ -100,7 +108,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchData();
-  }, [timeframe, activeTab]);
+  }, [timeframe, activeTab, logsPage]);
 
   const handleUserSearch = async (email: string = searchEmail) => {
     if (!email) return;
@@ -163,6 +171,24 @@ export default function AdminDashboard() {
   const formatNumber = (val: number) => {
     return new Intl.NumberFormat('en-US').format(val || 0);
   };
+  
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  const toggleLogExpand = (id: string) => {
+    if (expandedLogId === id) {
+      setExpandedLogId(null);
+    } else {
+      setExpandedLogId(id);
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
@@ -182,7 +208,7 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-2">
           <button
             onClick={() => setActiveTab('cost')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
               activeTab === 'cost'
                 ? 'bg-gradient-to-r from-orange-500/10 to-yellow-500/10 text-orange-500 border border-orange-500/20 shadow-sm'
                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
@@ -194,7 +220,7 @@ export default function AdminDashboard() {
           
           <button
             onClick={() => setActiveTab('usage')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
               activeTab === 'usage'
                 ? 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-500 border border-purple-500/20 shadow-sm'
                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
@@ -202,6 +228,18 @@ export default function AdminDashboard() {
           >
             <Users className="w-5 h-5" />
             Usage & Users
+          </button>
+
+          <button
+            onClick={() => setActiveTab('logs')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
+              activeTab === 'logs'
+                ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-500 border border-blue-500/20 shadow-sm'
+                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            Logs
           </button>
 
           <div className="h-px bg-border my-2" />
@@ -224,31 +262,40 @@ export default function AdminDashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-paper p-4 rounded-xl border border-border">
           <div>
             <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-              {activeTab === 'cost' ? <DollarSign className="w-5 h-5 text-orange-500" /> : <Users className="w-5 h-5 text-purple-500" />}
-              {activeTab === 'cost' ? 'Financial Overview' : 'Usage Metrics'}
+              {activeTab === 'cost' && <DollarSign className="w-5 h-5 text-orange-500" />}
+              {activeTab === 'usage' && <Users className="w-5 h-5 text-purple-500" />}
+              {activeTab === 'logs' && <FileText className="w-5 h-5 text-blue-500" />}
+              
+              {activeTab === 'cost' && 'Financial Overview'}
+              {activeTab === 'usage' && 'Usage Metrics'}
+              {activeTab === 'logs' && 'System Logs'}
             </h2>
             <p className="text-xs text-text-secondary mt-1">
-              {activeTab === 'cost' ? 'Track API costs and token consumption' : 'Monitor system solves and user activity'}
+              {activeTab === 'cost' && 'Track API costs and token consumption'}
+              {activeTab === 'usage' && 'Monitor system solves and user activity'}
+              {activeTab === 'logs' && 'Detailed inspection of all system interactions'}
             </p>
           </div>
 
-          {/* Timeframe Selector */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
-            <Calendar className="w-4 h-4 text-text-secondary hidden md:block" />
-            {(['today', 'yesterday', 'week', 'month', 'year', 'all'] as Timeframe[]).map((tf) => (
-              <button
-                key={tf}
-                onClick={() => setTimeframe(tf)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
-                  timeframe === tf
-                    ? 'bg-primary/20 text-primary border border-primary/30'
-                    : 'bg-surface-hover text-text-secondary hover:bg-surface-highlight'
-                }`}
-              >
-                {tf.charAt(0).toUpperCase() + tf.slice(1)}
-              </button>
-            ))}
-          </div>
+          {/* Timeframe Selector (Hidden for Logs as it has its own pagination/filtering potentially, but user can use timeframe if needed in future) */}
+          {activeTab !== 'logs' && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
+              <Calendar className="w-4 h-4 text-text-secondary hidden md:block" />
+              {(['today', 'yesterday', 'week', 'month', 'year', 'all'] as Timeframe[]).map((tf) => (
+                <button
+                  key={tf}
+                  onClick={() => setTimeframe(tf)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${ 
+                    timeframe === tf
+                      ? 'bg-primary/20 text-primary border border-primary/30'
+                      : 'bg-surface-hover text-text-secondary hover:bg-surface-highlight'
+                  }`}
+                >
+                  {tf.charAt(0).toUpperCase() + tf.slice(1)}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Dynamic Content */}
@@ -275,7 +322,7 @@ export default function AdminDashboard() {
                   <p className="text-2xl font-bold text-text-primary">{formatCurrency(financials.providers.gemini.cost)}</p>
                   <div className="w-full h-1.5 bg-surface-dark rounded-full mt-3 overflow-hidden">
                     <div 
-                      className="h-full bg-blue-500 rounded-full" 
+                      className="h-full bg-blue-500 rounded-full"
                       style={{ width: `${financials.providers.gemini.percentage}%` }}
                     />
                   </div>
@@ -287,7 +334,7 @@ export default function AdminDashboard() {
                   <p className="text-2xl font-bold text-text-primary">{formatCurrency(financials.providers.openai.cost)}</p>
                   <div className="w-full h-1.5 bg-surface-dark rounded-full mt-3 overflow-hidden">
                     <div 
-                      className="h-full bg-green-500 rounded-full" 
+                      className="h-full bg-green-500 rounded-full"
                       style={{ width: `${financials.providers.openai.percentage}%` }}
                     />
                   </div>
@@ -299,7 +346,7 @@ export default function AdminDashboard() {
                   <p className="text-2xl font-bold text-text-primary">{formatCurrency(financials.providers.claude.cost)}</p>
                   <div className="w-full h-1.5 bg-surface-dark rounded-full mt-3 overflow-hidden">
                     <div 
-                      className="h-full bg-orange-500 rounded-full" 
+                      className="h-full bg-orange-500 rounded-full"
                       style={{ width: `${financials.providers.claude.percentage}%` }}
                     />
                   </div>
@@ -481,7 +528,7 @@ export default function AdminDashboard() {
                                                                 {/* Subscription History Badge */}
                                                                 <div className="mt-4 flex flex-wrap gap-2">
                                                                   {userResult.user.subscriptionHistory?.map((sub: any, idx: number) => (
-                                                                    <div key={idx} className={`px-3 py-1.5 rounded-lg text-xs border ${
+                                                                    <div key={idx} className={`px-3 py-1.5 rounded-lg text-xs border ${ 
                                                                       sub.status === 'ACTIVE' 
                                                                         ? 'bg-green-500/10 text-green-500 border-green-500/20' 
                                                                         : 'bg-surface-paper text-text-secondary border-border'
@@ -509,7 +556,7 @@ export default function AdminDashboard() {
                                             
                                                                 {/* Margin Badge */}
                                                                 {userResult.estimatedRevenue > 0 ? (
-                                                                   <div className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                                                                   <div className={`px-3 py-1 rounded-full text-xs font-bold border ${ 
                                                                      userResult.costToRevenuePercentage > 100 
                                                                        ? 'bg-red-500/10 text-red-500 border-red-500/20'
                                                                        : userResult.costToRevenuePercentage > 80
@@ -566,6 +613,168 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 )}
+              </Card>
+            </div>
+          )}
+
+          {/* LOGS TAB CONTENT */}
+          {activeTab === 'logs' && logsData && (
+            <div className="space-y-6">
+              <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-surface-paper border-b border-border">
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Time</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">User</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Mode</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Input</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Providers</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Cost</th>
+                        <th className="py-4 px-6"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {logsData.logs.map((log: any) => (
+                        <>
+                          <tr 
+                            key={log.id} 
+                            onClick={() => toggleLogExpand(log.id)}
+                            className="hover:bg-surface-hover/50 transition-colors cursor-pointer"
+                          >
+                            <td className="py-4 px-6 text-sm text-text-secondary whitespace-nowrap">
+                              {formatDate(log.createdAt)}
+                            </td>
+                            <td className="py-4 px-6 text-sm text-text-primary font-medium">
+                              {log.user.email}
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className={`px-2 py-1 rounded text-xs font-bold ${ 
+                                log.mode === 'EXPERT' 
+                                  ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20'
+                                  : log.mode === 'FAST'
+                                    ? 'bg-green-500/10 text-green-500 border border-green-500/20'
+                                    : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                              }`}>
+                                {log.mode}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 text-sm text-text-secondary max-w-[200px] truncate">
+                              {log.input.text}
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="flex -space-x-2">
+                                {log.outputs.map((out: any, i: number) => (
+                                  <div 
+                                    key={i} 
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center border border-surface text-[10px] font-bold text-white
+                                      ${out.provider === 'GEMINI' ? 'bg-blue-500' : ''}
+                                      ${out.provider === 'OPENAI' ? 'bg-green-500' : ''}
+                                      ${out.provider === 'CLAUDE' ? 'bg-orange-500' : ''}
+                                    `}
+                                    title={out.provider}
+                                  >
+                                    {out.provider[0]}
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="text-right py-4 px-6 text-sm font-bold text-text-primary">
+                              {formatCurrency(log.totalCost)}
+                            </td>
+                            <td className="py-4 px-6 text-right">
+                              {expandedLogId === log.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </td>
+                          </tr>
+                          
+                          {/* Expanded Details */}
+                          {expandedLogId === log.id && (
+                            <tr className="bg-surface-hover/20">
+                              <td colSpan={7} className="p-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  {/* Input Section */}
+                                  <div>
+                                    <h4 className="text-sm font-bold text-text-secondary mb-2 uppercase tracking-wider">Input</h4>
+                                    <div className="bg-surface p-4 rounded-lg border border-border">
+                                      <p className="text-text-primary whitespace-pre-wrap text-sm">{log.input.text}</p>
+                                      {log.input.images.map((img: any) => (
+                                        <div key={img.id} className="mt-2 text-xs text-text-secondary flex items-center gap-2">
+                                          <Shield className="w-3 h-3" />
+                                          Image: {img.source} ({img.hasImage ? 'Stored' : 'Deleted'})
+                                          {img.regionData && <span className="text-green-500 ml-2">Has Region Data</span>}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* Output Section */}
+                                  <div>
+                                    <h4 className="text-sm font-bold text-text-secondary mb-2 uppercase tracking-wider">Outputs & Costs</h4>
+                                    <div className="space-y-4">
+                                      {log.outputs.map((out: any, idx: number) => (
+                                        <div key={idx} className="bg-surface p-4 rounded-lg border border-border">
+                                          <div className="flex justify-between items-center mb-2">
+                                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${ 
+                                              out.provider === 'GEMINI' ? 'bg-blue-500/10 text-blue-500' :
+                                              out.provider === 'OPENAI' ? 'bg-green-500/10 text-green-500' :
+                                              'bg-orange-500/10 text-orange-500'
+                                            }`}>
+                                              {out.provider}
+                                            </span>
+                                            <span className="text-xs font-mono text-text-secondary">
+                                              {formatCurrency(out.cost)}
+                                            </span>
+                                          </div>
+                                          <p className="text-text-primary text-sm line-clamp-3 mb-2">{out.shortAnswer}</p>
+                                          
+                                          {/* Metadata details */}
+                                          <div className="text-[10px] text-text-secondary font-mono bg-black/20 p-2 rounded">
+                                            <p>Confidence: {out.confidence?.toFixed(2) ?? 'N/A'}</p>
+                                            {out.metadata?.tokenUsage && (
+                                              <p>Tokens: {out.metadata.tokenUsage.inputTokens} in / {out.metadata.tokenUsage.outputTokens} out</p>
+                                            )}
+                                            {out.structuredAnswer && (
+                                              <p className="text-green-500 mt-1">Has Structured Answer</p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between p-4 border-t border-border bg-surface-paper">
+                  <div className="text-sm text-text-secondary">
+                    Showing {(logsData.pagination.page - 1) * logsData.pagination.limit + 1} to {Math.min(logsData.pagination.page * logsData.pagination.limit, logsData.pagination.total)} of {logsData.pagination.total} logs
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={logsPage <= 1}
+                      onClick={() => setLogsPage(p => p - 1)}
+                    >
+                      Previous
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={logsPage >= logsData.pagination.totalPages}
+                      onClick={() => setLogsPage(p => p + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
               </Card>
             </div>
           )}
