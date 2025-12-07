@@ -52,7 +52,7 @@ export default function AdminLayout({
     return (
       <div className="min-h-screen">
         <Navigation />
-        <div className="max-w-7xl mx-auto px-6 pt-20 sm:pt-24 lg:pt-32 pb-12">
+        <div className="px-6 pt-20 sm:pt-24 lg:pt-32 pb-12">
           <div className="flex items-center justify-center h-64">
             <div className="text-text-secondary">Loading...</div>
           </div>
@@ -68,7 +68,7 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-6 pt-20 sm:pt-24 lg:pt-32 pb-12">
+      <div className="px-6 pt-20 sm:pt-24 lg:pt-32 pb-12">
         {children}
       </div>
     </div>

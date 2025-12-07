@@ -352,80 +352,53 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {/* Gemini Row */}
-                      <tr className="hover:bg-surface-hover/50 transition-colors">
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 text-xs font-bold">G</div>
-                            <div>
-                              <p className="font-medium text-text-primary">Gemini</p>
-                              <p className="text-xs text-text-secondary">Flash + Pro</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
-                          {formatNumber(financials.providers.gemini.inputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
-                          {formatNumber(financials.providers.gemini.outputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-primary font-mono text-sm">
-                          {formatNumber(financials.providers.gemini.inputTokens + financials.providers.gemini.outputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 font-bold text-text-primary">
-                          {formatCurrency(financials.providers.gemini.cost)}
-                        </td>
-                      </tr>
+                      {(['gemini', 'openai', 'claude'] as const).map((providerKey) => {
+                        const providerData = financials.providers[providerKey];
+                        const models = Object.entries(providerData.models);
+                        
+                        if (models.length === 0) {
+                           // If no models, maybe show 0 stats for provider (or skip)
+                           // But we want to show at least the provider row if it has cost?
+                           // The aggregated endpoint returns total cost/tokens at provider level too.
+                           // But models list might be empty if we didn't iterate any messages.
+                           // Let's just skip if empty for now, or show a summary row.
+                           // Actually, if the loop found no messages, models is empty.
+                           // We can show a "No usage" row?
+                           if (providerData.cost === 0) return null;
+                        }
 
-                      {/* OpenAI Row */}
-                      <tr className="hover:bg-surface-hover/50 transition-colors">
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 text-xs font-bold">O</div>
-                            <div>
-                              <p className="font-medium text-text-primary">OpenAI</p>
-                              <p className="text-xs text-text-secondary">GPT-5 Models</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
-                          {formatNumber(financials.providers.openai.inputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
-                          {formatNumber(financials.providers.openai.outputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-primary font-mono text-sm">
-                          {formatNumber(financials.providers.openai.inputTokens + financials.providers.openai.outputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 font-bold text-text-primary">
-                          {formatCurrency(financials.providers.openai.cost)}
-                        </td>
-                      </tr>
-
-                      {/* Claude Row */}
-                      <tr className="hover:bg-surface-hover/50 transition-colors">
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 text-xs font-bold">C</div>
-                            <div>
-                              <p className="font-medium text-text-primary">Claude</p>
-                              <p className="text-xs text-text-secondary">Sonnet 3.5/4.5</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
-                          {formatNumber(financials.providers.claude.inputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
-                          {formatNumber(financials.providers.claude.outputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 text-text-primary font-mono text-sm">
-                          {formatNumber(financials.providers.claude.inputTokens + financials.providers.claude.outputTokens)}
-                        </td>
-                        <td className="text-right py-4 px-4 font-bold text-text-primary">
-                          {formatCurrency(financials.providers.claude.cost)}
-                        </td>
-                      </tr>
+                        return models.map(([modelName, stats]) => (
+                          <tr key={`${providerKey}-${modelName}`} className="hover:bg-surface-hover/50 transition-colors">
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                                  ${providerKey === 'gemini' ? 'bg-blue-500/10 text-blue-500' : ''}
+                                  ${providerKey === 'openai' ? 'bg-green-500/10 text-green-500' : ''}
+                                  ${providerKey === 'claude' ? 'bg-orange-500/10 text-orange-500' : ''}
+                                `}>
+                                  {providerKey.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-text-primary">{modelName}</p>
+                                  <p className="text-xs text-text-secondary uppercase">{providerKey}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
+                              {formatNumber(stats.inputTokens)}
+                            </td>
+                            <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
+                              {formatNumber(stats.outputTokens)}
+                            </td>
+                            <td className="text-right py-4 px-4 text-text-primary font-mono text-sm">
+                              {formatNumber(stats.inputTokens + stats.outputTokens)}
+                            </td>
+                            <td className="text-right py-4 px-4 font-bold text-text-primary">
+                              {formatCurrency(stats.cost)}
+                            </td>
+                          </tr>
+                        ));
+                      })}
                     </tbody>
                   </table>
                 </div>

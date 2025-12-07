@@ -226,11 +226,11 @@ export class ApiClient {
   async getAdminFinancials(token: string, startDate: string, endDate: string) {
     return this.request<{
       totalCost: number;
-      providers: {
-        gemini: { cost: number; percentage: number; inputTokens: number; outputTokens: number };
-        openai: { cost: number; percentage: number; inputTokens: number; outputTokens: number };
-        claude: { cost: number; percentage: number; inputTokens: number; outputTokens: number; thinkingTokens?: number };
-      };
+      providers: Record<'gemini' | 'openai' | 'claude', {
+        cost: number;
+        percentage: number;
+        models: Record<string, { inputTokens: number; outputTokens: number; cost: number }>;
+      }>;
     }>(`/admin/financials?startDate=${startDate}&endDate=${endDate}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
