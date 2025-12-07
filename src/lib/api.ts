@@ -272,6 +272,29 @@ export class ApiClient {
     });
   }
 
+  async getAdminUsers(token: string, page: number = 1, limit: number = 50) {
+    return this.request<{
+      users: Array<{
+        id: string;
+        email: string;
+        role: string;
+        createdAt: string;
+        plan: string;
+        planSince: string;
+        lifetimeCost: number;
+        lifetimeSolves: number;
+      }>;
+      pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+    }>(`/admin/users?page=${page}&limit=${limit}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
   async getAdminLogs(token: string, page: number = 1, limit: number = 50) {
     return this.request<{
       logs: Array<{

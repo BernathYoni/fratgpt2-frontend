@@ -6,10 +6,10 @@ import { getToken } from '@/lib/auth';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp, Clock, CreditCard } from 'lucide-react';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
-type Tab = 'cost' | 'usage' | 'logs';
+type Tab = 'cost' | 'users' | 'logs';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('cost');
@@ -18,7 +18,8 @@ export default function AdminDashboard() {
   
   // Data states
   const [financials, setFinancials] = useState<any>(null);
-  const [metrics, setMetrics] = useState<any>(null);
+  const [usersData, setUsersData] = useState<any>(null);
+  const [usersPage, setUsersPage] = useState(1);
   const [logsData, setLogsData] = useState<any>(null);
   const [logsPage, setLogsPage] = useState(1);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
@@ -82,16 +83,10 @@ export default function AdminDashboard() {
         if (res.success) {
           setFinancials(res.data);
         }
-      } else if (activeTab === 'usage') {
-        // Fetch metrics
-        const metricsRes = await api.getAdminMetrics(token, startDate, endDate);
-        if (metricsRes.success) {
-          setMetrics(metricsRes.data);
-        }
-        
-        // If there's a user search active, re-fetch it for new timeframe
-        if (userResult && searchEmail) {
-          handleUserSearch(searchEmail);
+      } else if (activeTab === 'users') {
+        const res = await api.getAdminUsers(token, usersPage, 50);
+        if (res.success) {
+          setUsersData(res.data);
         }
       } else if (activeTab === 'logs') {
         const res = await api.getAdminLogs(token, logsPage, 50);
@@ -108,31 +103,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchData();
-  }, [timeframe, activeTab, logsPage]);
-
-  const handleUserSearch = async (email: string = searchEmail) => {
-    if (!email) return;
-    
-    setSearchLoading(true);
-    setSearchError('');
-    const token = getToken();
-    const { startDate, endDate } = getDateRange(timeframe);
-
-    try {
-      const res = await api.searchUserUsage(token || '', email, startDate, endDate);
-      if (res.success) {
-        setUserResult(res.data);
-      } else {
-        setUserResult(null);
-        setSearchError(res.error || 'User not found');
-      }
-    } catch (err) {
-      setUserResult(null);
-      setSearchError('Failed to search user');
-    } finally {
-      setSearchLoading(false);
-    }
-  };
+  }, [timeframe, activeTab, logsPage, usersPage]);
 
   const handleResetStats = async () => {
     if (!confirm('⚠️ DANGER: This will wipe ALL usage and cost statistics from the database. This cannot be undone.\n\nAre you sure you want to reset all stats?')) {
@@ -173,6 +144,14 @@ export default function AdminDashboard() {
   };
   
   const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const formatDateTime = (dateStr: string) => {
     return new Date(dateStr).toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -219,15 +198,15 @@ export default function AdminDashboard() {
           </button>
           
           <button
-            onClick={() => setActiveTab('usage')}
+            onClick={() => setActiveTab('users')}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
-              activeTab === 'usage'
+              activeTab === 'users'
                 ? 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-500 border border-purple-500/20 shadow-sm'
                 : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
             }`}
           >
             <Users className="w-5 h-5" />
-            Usage & Users
+            Users
           </button>
 
           <button
@@ -263,22 +242,22 @@ export default function AdminDashboard() {
           <div>
             <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
               {activeTab === 'cost' && <DollarSign className="w-5 h-5 text-orange-500" />}
-              {activeTab === 'usage' && <Users className="w-5 h-5 text-purple-500" />}
+              {activeTab === 'users' && <Users className="w-5 h-5 text-purple-500" />}
               {activeTab === 'logs' && <FileText className="w-5 h-5 text-blue-500" />}
               
               {activeTab === 'cost' && 'Financial Overview'}
-              {activeTab === 'usage' && 'Usage Metrics'}
+              {activeTab === 'users' && 'User Management'}
               {activeTab === 'logs' && 'System Logs'}
             </h2>
             <p className="text-xs text-text-secondary mt-1">
               {activeTab === 'cost' && 'Track API costs and token consumption'}
-              {activeTab === 'usage' && 'Monitor system solves and user activity'}
+              {activeTab === 'users' && 'View all users and their lifetime value'}
               {activeTab === 'logs' && 'Detailed inspection of all system interactions'}
             </p>
           </div>
 
-          {/* Timeframe Selector (Hidden for Logs as it has its own pagination/filtering potentially, but user can use timeframe if needed in future) */}
-          {activeTab !== 'logs' && (
+          {/* Timeframe Selector (Hidden for Logs/Users as they use pagination) */}
+          {activeTab === 'cost' && (
             <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
               <Calendar className="w-4 h-4 text-text-secondary hidden md:block" />
               {(['today', 'yesterday', 'week', 'month', 'year', 'all'] as Timeframe[]).map((tf) => (
@@ -454,165 +433,94 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* USAGE TAB CONTENT */}
-          {activeTab === 'usage' && (
-            <div className="space-y-8">
-              {/* Metrics Cards */}
-              {metrics && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="p-8 flex items-center justify-between bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20">
-                    <div>
-                      <p className="text-text-secondary font-medium mb-1">Total Solves</p>
-                      <h2 className="text-4xl font-bold text-text-primary">{formatNumber(metrics.totalSolves)}</h2>
-                      <p className="text-sm text-text-secondary mt-2">
-                        Total homework problems solved
-                      </p>
-                    </div>
-                    <div className="p-4 bg-surface-paper rounded-full shadow-sm">
-                      <BarChart2 className="w-8 h-8 text-purple-500" />
-                    </div>
-                  </Card>
-
-                  <Card className="p-8 flex items-center justify-between bg-gradient-to-r from-pink-500/10 to-rose-500/10 border-pink-500/20">
-                    <div>
-                      <p className="text-text-secondary font-medium mb-1">Total Snips</p>
-                      <h2 className="text-4xl font-bold text-text-primary">{formatNumber(metrics.totalSnips)}</h2>
-                      <p className="text-sm text-text-secondary mt-2">
-                        Screen captures processed
-                      </p>
-                    </div>
-                    <div className="p-4 bg-surface-paper rounded-full shadow-sm">
-                      <Users className="w-8 h-8 text-pink-500" />
-                    </div>
-                  </Card>
+          {/* USERS TAB CONTENT (REPLACED) */}
+          {activeTab === 'users' && usersData && (
+            <div className="space-y-6">
+              <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-surface-paper border-b border-border">
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">User</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Role</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Plan</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Member Since</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Solves</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Lifetime Cost</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {usersData.users.map((user: any) => (
+                        <tr 
+                          key={user.id} 
+                          className="hover:bg-surface-hover/50 transition-colors"
+                        >
+                          <td className="py-4 px-6 text-sm">
+                            <div className="font-medium text-text-primary">{user.email}</div>
+                            <div className="text-xs text-text-secondary font-mono">{user.id}</div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${ 
+                              user.role === 'ADMIN' 
+                                ? 'bg-red-500/10 text-red-500 border border-red-500/20'
+                                : 'bg-surface-paper text-text-secondary border border-border'
+                            }`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex flex-col">
+                              <span className={`text-sm font-bold ${ 
+                                user.plan === 'PRO' ? 'text-purple-500' :
+                                user.plan === 'BASIC' ? 'text-blue-500' :
+                                'text-text-secondary'
+                              }`}>
+                                {user.plan}
+                              </span>
+                              <span className="text-[10px] text-text-secondary">
+                                since {formatDate(user.planSince)}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-sm text-text-secondary">
+                            {formatDate(user.createdAt)}
+                          </td>
+                          <td className="text-right py-4 px-6 text-sm font-mono text-text-primary">
+                            {formatNumber(user.lifetimeSolves)}
+                          </td>
+                          <td className="text-right py-4 px-6 text-sm font-bold text-text-primary">
+                            {formatCurrency(user.lifetimeCost)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
 
-              {/* User Search */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold text-text-primary mb-6 flex items-center gap-2">
-                  <Search className="w-5 h-5 text-primary" />
-                  User Cost Lookup
-                </h3>
-
-                <div className="flex gap-4 mb-8">
-                  <div className="flex-1">
-                    <Input 
-                      placeholder="Enter user email address..." 
-                      value={searchEmail}
-                      onChange={(e) => setSearchEmail(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleUserSearch()}
-                    />
+                {/* Pagination */}
+                <div className="flex items-center justify-between p-4 border-t border-border bg-surface-paper">
+                  <div className="text-sm text-text-secondary">
+                    Showing {(usersData.pagination.page - 1) * usersData.pagination.limit + 1} to {Math.min(usersData.pagination.page * usersData.pagination.limit, usersData.pagination.total)} of {usersData.pagination.total} users
                   </div>
-                  <Button 
-                    onClick={() => handleUserSearch()}
-                    disabled={searchLoading || !searchEmail}
-                  >
-                    {searchLoading ? 'Searching...' : 'Search'}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={usersPage <= 1}
+                      onClick={() => setUsersPage(p => p - 1)}
+                    >
+                      Previous
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={usersPage >= usersData.pagination.totalPages}
+                      onClick={() => setUsersPage(p => p + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
                 </div>
-
-                {searchError && (
-                  <div className="p-4 bg-red-500/10 text-red-500 rounded-lg border border-red-500/20 mb-4">
-                    {searchError}
-                  </div>
-                )}
-
-                {userResult && (
-                  <div className="bg-surface-hover/30 rounded-xl p-6 border border-border animate-in fade-in zoom-in-95 duration-300">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-6 border-b border-border">
-                      <div>
-                        <h4 className="text-xl font-bold text-text-primary">{userResult.user.email}</h4>
-                                                                <p className="text-text-secondary text-sm">User ID: {userResult.user.id}</p>
-                                                                
-                                                                {/* Subscription History Badge */}
-                                                                <div className="mt-4 flex flex-wrap gap-2">
-                                                                  {userResult.user.subscriptionHistory?.map((sub: any, idx: number) => (
-                                                                    <div key={idx} className={`px-3 py-1.5 rounded-lg text-xs border ${ 
-                                                                      sub.status === 'ACTIVE' 
-                                                                        ? 'bg-green-500/10 text-green-500 border-green-500/20' 
-                                                                        : 'bg-surface-paper text-text-secondary border-border'
-                                                                    }`}>
-                                                                      <span className="font-bold">{sub.plan}</span>
-                                                                      <span className="mx-1">•</span>
-                                                                      <span>{sub.durationMonths} mo</span>
-                                                                      {sub.status === 'ACTIVE' && <span className="ml-1 text-[10px] uppercase bg-green-500 text-white px-1 rounded">Current</span>}
-                                                                    </div>
-                                                                  ))}
-                                                                </div>
-                                                              </div>
-                                                              <div className="flex flex-col items-end gap-4 mt-4 md:mt-0">
-                                                                {/* Financials */}
-                                                                <div className="flex items-center gap-6 text-right">
-                                                                  <div>
-                                                                    <p className="text-sm text-text-secondary mb-1">Est. Revenue</p>
-                                                                    <p className="text-lg font-semibold text-text-primary">{formatCurrency(userResult.estimatedRevenue)}</p>
-                                                                  </div>
-                                                                  <div>
-                                                                    <p className="text-sm text-text-secondary mb-1">Total Cost</p>
-                                                                    <p className="text-2xl font-bold text-primary">{formatCurrency(userResult.totalCost)}</p>
-                                                                  </div>
-                                                                </div>
-                                            
-                                                                {/* Margin Badge */}
-                                                                {userResult.estimatedRevenue > 0 ? (
-                                                                   <div className={`px-3 py-1 rounded-full text-xs font-bold border ${ 
-                                                                     userResult.costToRevenuePercentage > 100 
-                                                                       ? 'bg-red-500/10 text-red-500 border-red-500/20'
-                                                                       : userResult.costToRevenuePercentage > 80
-                                                                         ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                                                                         : 'bg-green-500/10 text-green-500 border-green-500/20'
-                                                                   }`}>
-                                                                     {userResult.costToRevenuePercentage.toFixed(1)}% Cost Ratio
-                                                                   </div>
-                                                                ) : (
-                                                                  <div className="px-3 py-1 rounded-full text-xs font-bold bg-surface-paper text-text-secondary border border-border">
-                                                                    No Revenue (Free)
-                                                                  </div>
-                                                                )}
-                                                              </div>
-                                                            </div>
-                                            
-                                                            <h5 className="text-sm font-medium text-text-secondary mb-4 uppercase tracking-wider">Cost Breakdown</h5>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {/* User - Gemini */}
-                      <div className="p-4 bg-surface-paper rounded-lg border border-border relative overflow-hidden">
-                        <div className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-1000" style={{ width: `${userResult.providers.gemini.percentage}%` }} />
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium text-text-primary">Gemini</span>
-                          <span className="text-xs font-bold bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full">
-                            {userResult.providers.gemini.percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                        <p className="text-xl font-bold text-text-primary">{formatCurrency(userResult.providers.gemini.cost)}</p>
-                      </div>
-
-                      {/* User - OpenAI */}
-                      <div className="p-4 bg-surface-paper rounded-lg border border-border relative overflow-hidden">
-                        <div className="absolute bottom-0 left-0 h-1 bg-green-500 transition-all duration-1000" style={{ width: `${userResult.providers.openai.percentage}%` }} />
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium text-text-primary">OpenAI</span>
-                          <span className="text-xs font-bold bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full">
-                            {userResult.providers.openai.percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                        <p className="text-xl font-bold text-text-primary">{formatCurrency(userResult.providers.openai.cost)}</p>
-                      </div>
-
-                      {/* User - Claude */}
-                      <div className="p-4 bg-surface-paper rounded-lg border border-border relative overflow-hidden">
-                        <div className="absolute bottom-0 left-0 h-1 bg-orange-500 transition-all duration-1000" style={{ width: `${userResult.providers.claude.percentage}%` }} />
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium text-text-primary">Claude</span>
-                          <span className="text-xs font-bold bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full">
-                            {userResult.providers.claude.percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                        <p className="text-xl font-bold text-text-primary">{formatCurrency(userResult.providers.claude.cost)}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </Card>
             </div>
           )}
@@ -643,7 +551,7 @@ export default function AdminDashboard() {
                             className="hover:bg-surface-hover/50 transition-colors cursor-pointer"
                           >
                             <td className="py-4 px-6 text-sm text-text-secondary whitespace-nowrap">
-                              {formatDate(log.createdAt)}
+                              {formatDateTime(log.createdAt)}
                             </td>
                             <td className="py-4 px-6 text-sm text-text-primary font-medium">
                               {log.user.email}
