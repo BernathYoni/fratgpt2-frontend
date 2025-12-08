@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { Button } from './components/ui/Button';
 import { Navigation } from './components/Navigation';
+import { ReferralTracker } from './components/ReferralTracker';
 import {
   Scissors,
   Star,
@@ -16,19 +16,11 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const refCode = searchParams.get('ref');
-    if (refCode) {
-      // Store referral code for checkout
-      localStorage.setItem('fratgpt_affiliate_ref', refCode);
-      console.log('Affiliate tracking:', refCode);
-    }
-  }, [searchParams]);
-
   return (
     <div className="min-h-screen">
+      <Suspense fallback={null}>
+        <ReferralTracker />
+      </Suspense>
       <Navigation />
 
       {/* Hero Section */}
