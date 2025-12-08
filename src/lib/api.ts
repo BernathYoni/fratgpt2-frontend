@@ -143,6 +143,9 @@ export class ApiClient {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ priceId: priceIds[plan], affiliateCode }),
+    }).then(res => {
+      if (!res.success) console.error('[API] createCheckoutSession failed:', res.error);
+      return res;
     });
   }
 
