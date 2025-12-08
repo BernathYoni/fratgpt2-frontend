@@ -358,8 +358,8 @@ export default function AdminDashboard() {
                         const models = Object.entries(providerData.models);
 
                         // Calculate totals for provider summary
-                        const providerInputTokens = Object.values(providerData.models).reduce((sum, m: { inputTokens: number }) => sum + m.inputTokens, 0);
-                        const providerOutputTokens = Object.values(providerData.models).reduce((sum, m: { outputTokens: number }) => sum + m.outputTokens, 0);
+                        const providerInputTokens = Object.values(providerData.models).reduce((sum: number, m: any) => sum + (m.inputTokens || 0), 0);
+                        const providerOutputTokens = Object.values(providerData.models).reduce((sum: number, m: any) => sum + (m.outputTokens || 0), 0);
                         const providerTotalTokens = providerInputTokens + providerOutputTokens;
                         const providerCost = providerData.cost;
 
