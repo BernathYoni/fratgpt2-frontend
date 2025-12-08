@@ -131,7 +131,7 @@ export class ApiClient {
     };
   }
 
-  async createCheckoutSession(token: string, plan: 'basic' | 'pro' | 'unlimited') {
+  async createCheckoutSession(token: string, plan: 'basic' | 'pro' | 'unlimited', affiliateCode?: string) {
     // Map plan names to Stripe price IDs
     const priceIds: Record<string, string> = {
       basic: process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC || 'price_1SQdkDCDxzHnrj8R0nSwZApT',
@@ -142,12 +142,55 @@ export class ApiClient {
     return this.request<{ url: string }>('/billing/create-checkout-session', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ priceId: priceIds[plan] }),
+      body: JSON.stringify({ priceId: priceIds[plan], affiliateCode }),
     });
   }
 
   async getCustomerPortalUrl(token: string) {
     return this.request<{ url: string }>('/billing/create-portal-session', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  // Affiliate endpoints
+  async getAffiliates(token: string) {
+    return this.request<Array<{
+      id: string;
+      name: string;
+      code: string;
+      referralLink: string;
+      visits: number;
+      signups: number;
+      conversions: number;
+      payoutRate: number;
+      amountPaid: number;
+      referredUsersCount: number;
+      unpaidBalance: number;
+      createdAt: string;
+    }>>('/admin/affiliates', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async createAffiliate(token: string, name: string, code?: string) {
+    return this.request<{
+      id: string;
+      name: string;
+      code: string;
+      referralLink: string;
+    }>('/admin/affiliates', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ name, code }),
+    });
+  }
+
+  async markAffiliatePaid(token: string, affiliateId: string) {
+    return this.request<{
+      id: string;
+      amountPaid: number;
+    }>(`/admin/affiliates/${affiliateId}/mark-paid`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     });

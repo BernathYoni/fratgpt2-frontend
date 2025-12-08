@@ -162,7 +162,12 @@ function SubscribeContent() {
     // token already retrieved above at line 90
 
     console.log('[SUBSCRIBE] 🌐 Calling createCheckoutSession API...');
-    const response = await api.createCheckoutSession(token, plan);
+    
+    // Get affiliate code if exists
+    const affiliateCode = localStorage.getItem('fratgpt_affiliate_ref') || undefined;
+    if (affiliateCode) console.log('[SUBSCRIBE] Applying affiliate code:', affiliateCode);
+
+    const response = await api.createCheckoutSession(token, plan, affiliateCode);
     console.log('[SUBSCRIBE] Checkout response:', response.success ? 'SUCCESS' : 'FAILED');
 
     if (response.success && response.data?.url) {

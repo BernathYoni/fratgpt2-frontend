@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from './components/ui/Button';
 import { Navigation } from './components/Navigation';
@@ -14,6 +16,17 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      // Store referral code for checkout
+      localStorage.setItem('fratgpt_affiliate_ref', refCode);
+      console.log('Affiliate tracking:', refCode);
+    }
+  }, [searchParams]);
+
   return (
     <div className="min-h-screen">
       <Navigation />

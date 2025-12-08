@@ -7,10 +7,10 @@ import { getToken } from '@/lib/auth';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp, Clock, CreditCard } from 'lucide-react';
+import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp, Clock, CreditCard, Link as LinkIcon, Plus, X } from 'lucide-react';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
-type Tab = 'cost' | 'users' | 'logs';
+type Tab = 'cost' | 'users' | 'logs' | 'affiliates';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('cost');
@@ -24,6 +24,13 @@ export default function AdminDashboard() {
   const [logsData, setLogsData] = useState<any>(null);
   const [logsPage, setLogsPage] = useState(1);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const [affiliatesData, setAffiliatesData] = useState<any[] | null>(null);
+  
+  // Affiliate form states
+  const [showAffiliateForm, setShowAffiliateForm] = useState(false);
+  const [newAffiliateName, setNewAffiliateName] = useState('');
+  const [newAffiliateCode, setNewAffiliateCode] = useState('');
+  const [createAffiliateLoading, setCreateAffiliateLoading] = useState(false);
   
   // User search states
   const [searchEmail, setSearchEmail] = useState('');
@@ -95,6 +102,11 @@ export default function AdminDashboard() {
         if (res.success) {
           setLogsData(res.data);
         }
+      } else if (activeTab === 'affiliates') {
+        const res = await api.getAffiliates(token);
+        if (res.success && res.data) {
+          setAffiliatesData(res.data);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch admin data:', err);
@@ -106,6 +118,49 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, [timeframe, activeTab, logsPage, usersPage]);
+
+  const handleCreateAffiliate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateAffiliateLoading(true);
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const res = await api.createAffiliate(token, newAffiliateName, newAffiliateCode || undefined);
+      if (res.success) {
+        alert('Affiliate created successfully!');
+        setShowAffiliateForm(false);
+        setNewAffiliateName('');
+        setNewAffiliateCode('');
+        fetchData(); // Refresh list
+      } else {
+        alert('Failed to create affiliate: ' + res.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error creating affiliate');
+    } finally {
+      setCreateAffiliateLoading(false);
+    }
+  };
+
+  const handleMarkPaid = async (affiliateId: string, amount: number) => {
+    if (!confirm(`Confirm payout of $${amount.toFixed(2)}? This will reset their unpaid balance to $0.`)) return;
+    
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const res = await api.markAffiliatePaid(token, affiliateId);
+      if (res.success) {
+        fetchData();
+      } else {
+        alert('Failed to mark paid: ' + res.error);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleResetStats = async (scope: 'all' | 'today') => {
     const message = scope === 'today' 
@@ -216,6 +271,18 @@ export default function AdminDashboard() {
           </button>
 
           <button
+            onClick={() => setActiveTab('affiliates')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
+              activeTab === 'affiliates'
+                ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-500 border border-green-500/20 shadow-sm'
+                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+            }`}
+          >
+            <LinkIcon className="w-5 h-5" />
+            Affiliates
+          </button>
+
+          <button
             onClick={() => setActiveTab('logs')}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
               activeTab === 'logs'
@@ -250,15 +317,18 @@ export default function AdminDashboard() {
               {activeTab === 'cost' && <DollarSign className="w-5 h-5 text-orange-500" />}
               {activeTab === 'users' && <Users className="w-5 h-5 text-purple-500" />}
               {activeTab === 'logs' && <FileText className="w-5 h-5 text-blue-500" />}
+              {activeTab === 'affiliates' && <LinkIcon className="w-5 h-5 text-green-500" />}
               
               {activeTab === 'cost' && 'Financial Overview'}
               {activeTab === 'users' && 'User Management'}
               {activeTab === 'logs' && 'System Logs'}
+              {activeTab === 'affiliates' && 'Affiliate Program'}
             </h2>
             <p className="text-xs text-text-secondary mt-1">
               {activeTab === 'cost' && 'Track API costs and token consumption'}
               {activeTab === 'users' && 'View all users and their lifetime value'}
               {activeTab === 'logs' && 'Detailed inspection of all system interactions'}
+              {activeTab === 'affiliates' && 'Manage partners and payouts ($5/user)'}
             </p>
           </div>
 
@@ -547,6 +617,159 @@ export default function AdminDashboard() {
                       Next
                     </Button>
                   </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* AFFILIATES TAB CONTENT */}
+          {activeTab === 'affiliates' && (
+            <div className="space-y-6">
+              {/* Action Bar */}
+              <div className="flex justify-end">
+                <Button 
+                  onClick={() => setShowAffiliateForm(true)}
+                  className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Affiliate
+                </Button>
+              </div>
+
+              {/* Add Affiliate Modal/Form */}
+              {showAffiliateForm && (
+                <Card className="p-6 border-green-500/30 bg-surface-paper/50">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-bold text-text-primary">Create New Affiliate</h3>
+                    <button 
+                      onClick={() => setShowAffiliateForm(false)}
+                      className="text-text-secondary hover:text-text-primary"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <form onSubmit={handleCreateAffiliate} className="flex flex-col gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-text-secondary mb-1 block">Partner Name</label>
+                      <Input 
+                        placeholder="e.g. Mike Smith" 
+                        value={newAffiliateName}
+                        onChange={(e) => setNewAffiliateName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-text-secondary mb-1 block">
+                        Custom Code (Optional)
+                        <span className="ml-2 text-xs text-text-secondary opacity-70">Leave blank to auto-generate</span>
+                      </label>
+                      <Input 
+                        placeholder="e.g. MIKEFREE" 
+                        value={newAffiliateCode}
+                        onChange={(e) => setNewAffiliateCode(e.target.value.toUpperCase())}
+                        pattern="[A-Z0-9_-]+"
+                        title="Uppercase letters, numbers, underscores, and dashes only"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-3 mt-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowAffiliateForm(false)}
+                        disabled={createAffiliateLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        className="bg-green-500 hover:bg-green-600 text-white"
+                        disabled={createAffiliateLoading}
+                      >
+                        {createAffiliateLoading ? 'Creating...' : 'Create Affiliate'}
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
+              )}
+
+              {/* Affiliates Table */}
+              <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-surface-paper border-b border-border">
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Partner</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Code</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Referral Link</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Signups</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Rate</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Unpaid Balance</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {affiliatesData?.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-text-secondary">
+                            No affiliates found. Create one to get started.
+                          </td>
+                        </tr>
+                      )}
+                      {affiliatesData?.map((aff) => (
+                        <tr key={aff.id} className="hover:bg-surface-hover/50 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="font-bold text-text-primary">{aff.name}</div>
+                            <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="font-mono text-xs bg-surface-paper px-2 py-1 rounded border border-border text-green-500 font-bold">
+                              {aff.code}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2 max-w-[200px]">
+                              <span className="text-xs text-text-secondary truncate font-mono select-all">
+                                {aff.referralLink}
+                              </span>
+                              <button 
+                                onClick={() => {
+                                  navigator.clipboard.writeText(aff.referralLink);
+                                  alert('Link copied!');
+                                }}
+                                className="text-text-secondary hover:text-primary"
+                                title="Copy Link"
+                              >
+                                <LinkIcon className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </td>
+                          <td className="text-right py-4 px-6">
+                            <div className="font-bold text-text-primary">{aff.signups}</div>
+                            {/* <div className="text-xs text-text-secondary">{aff.visits} visits</div> */}
+                          </td>
+                          <td className="text-right py-4 px-6 text-sm text-text-secondary">
+                            {formatCurrency(aff.payoutRate)}
+                          </td>
+                          <td className="text-right py-4 px-6">
+                            <span className={`font-bold ${aff.unpaidBalance > 0 ? 'text-green-500' : 'text-text-secondary'}`}>
+                              {formatCurrency(aff.unpaidBalance)}
+                            </span>
+                          </td>
+                          <td className="text-right py-4 px-6">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={aff.unpaidBalance <= 0}
+                              onClick={() => handleMarkPaid(aff.id, aff.unpaidBalance)}
+                              className={aff.unpaidBalance > 0 ? 'border-green-500/50 text-green-500 hover:bg-green-500/10' : ''}
+                            >
+                              Mark Paid
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </Card>
             </div>
