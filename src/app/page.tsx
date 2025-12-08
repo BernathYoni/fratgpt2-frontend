@@ -4,7 +4,6 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { Button } from './components/ui/Button';
 import { Navigation } from './components/Navigation';
-import { ReferralTracker } from './components/ReferralTracker';
 import {
   Scissors,
   Star,
@@ -19,9 +18,6 @@ export default function HomePage() {
   // TRIGGER DEPLOYMENT COMMENT
   return (
     <div className="min-h-screen">
-      <Suspense fallback={null}>
-        <ReferralTracker />
-      </Suspense>
       <Navigation />
 
       {/* Hero Section */}
