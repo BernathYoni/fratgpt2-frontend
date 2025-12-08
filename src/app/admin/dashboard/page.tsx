@@ -7,7 +7,7 @@ import { getToken } from '@/lib/auth';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp, Clock, CreditCard, Link as LinkIcon, Plus, X } from 'lucide-react';
+import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp, Clock, CreditCard, Link as LinkIcon, Plus, X, Edit, Archive } from 'lucide-react';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
 type Tab = 'cost' | 'users' | 'logs' | 'affiliates';
@@ -756,15 +756,42 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="text-right py-4 px-6">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={aff.unpaidBalance <= 0}
-                              onClick={() => handleMarkPaid(aff.id, aff.unpaidBalance)}
-                              className={aff.unpaidBalance > 0 ? 'border-green-500/50 text-green-500 hover:bg-green-500/10' : ''}
-                            >
-                              Mark Paid
-                            </Button>
+                            <div className="flex justify-end items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={aff.unpaidBalance <= 0}
+                                onClick={() => handleMarkPaid(aff.id, aff.unpaidBalance)}
+                                className={aff.unpaidBalance > 0 ? 'border-green-500/50 text-green-500 hover:bg-green-500/10' : ''}
+                                title="Mark as Paid"
+                              >
+                                Mark Paid
+                              </Button>
+                              
+                              <button 
+                                onClick={() => alert('Edit functionality coming soon')}
+                                className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors"
+                                title="Edit Affiliate"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+
+                              <button 
+                                onClick={() => alert('Archive functionality coming soon')}
+                                className="p-1.5 rounded-lg text-orange-500 hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20 transition-colors"
+                                title="Archive Affiliate"
+                              >
+                                <Archive className="w-4 h-4" />
+                              </button>
+
+                              <button 
+                                onClick={() => alert('Delete functionality coming soon')}
+                                className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors"
+                                title="Delete Affiliate"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
