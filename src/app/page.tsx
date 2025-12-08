@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
+  // TRIGGER DEPLOYMENT COMMENT
   return (
     <div className="min-h-screen">
       <Suspense fallback={null}>
