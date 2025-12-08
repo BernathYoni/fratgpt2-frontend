@@ -137,7 +137,11 @@ function SignupContent() {
 
       // Paid plan selected - redirect to Stripe checkout
       try {
-        const checkoutRes = await api.createCheckoutSession(token, plan as 'basic' | 'pro' | 'unlimited');
+        // Get affiliate code if exists
+        const affiliateCode = typeof window !== 'undefined' ? (localStorage.getItem('fratgpt_affiliate_ref') || undefined) : undefined;
+        if (affiliateCode) console.log('[SIGNUP] Applying affiliate code:', affiliateCode);
+
+        const checkoutRes = await api.createCheckoutSession(token, plan as 'basic' | 'pro' | 'unlimited', affiliateCode);
 
         if (!checkoutRes.success || !checkoutRes.data?.url) {
           setError('Failed to create checkout session. Please try again.');
@@ -261,7 +265,11 @@ function SignupContent() {
       // Paid plan selected - redirect to Stripe checkout
       console.log('[SIGNUP] 💳 Paid plan selected:', plan, '- Creating checkout session...');
       try {
-        const checkoutRes = await api.createCheckoutSession(token, plan as 'basic' | 'pro' | 'unlimited');
+        // Get affiliate code if exists
+        const affiliateCode = typeof window !== 'undefined' ? (localStorage.getItem('fratgpt_affiliate_ref') || undefined) : undefined;
+        if (affiliateCode) console.log('[SIGNUP] Applying affiliate code:', affiliateCode);
+
+        const checkoutRes = await api.createCheckoutSession(token, plan as 'basic' | 'pro' | 'unlimited', affiliateCode);
         console.log('[SIGNUP] Checkout response:', checkoutRes.success ? 'SUCCESS' : 'FAILED');
 
         if (!checkoutRes.success || !checkoutRes.data?.url) {
