@@ -173,7 +173,7 @@ export class ApiClient {
     });
   }
 
-  async createAffiliate(token: string, name: string, code?: string) {
+  async createAffiliate(token: string, name: string, code?: string, payoutRate?: number) {
     return this.request<{
       id: string;
       name: string;
@@ -182,7 +182,7 @@ export class ApiClient {
     }>('/admin/affiliates', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ name, code }),
+      body: JSON.stringify({ name, code, payoutRate }),
     });
   }
 

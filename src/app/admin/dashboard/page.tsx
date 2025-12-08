@@ -7,7 +7,7 @@ import { getToken } from '@/lib/auth';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp, Clock, CreditCard, Link as LinkIcon, Plus, X, Edit, Archive } from 'lucide-react';
+import { Search, DollarSign, Activity, Users, BarChart2, Calendar, Shield, LayoutDashboard, Trash2, FileText, ChevronDown, ChevronUp, Clock, CreditCard, Link as LinkIcon, Plus, X, Edit, Archive, RefreshCw } from 'lucide-react';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
 type Tab = 'cost' | 'users' | 'logs' | 'affiliates';
@@ -30,7 +30,9 @@ export default function AdminDashboard() {
   const [showAffiliateForm, setShowAffiliateForm] = useState(false);
   const [newAffiliateName, setNewAffiliateName] = useState('');
   const [newAffiliateCode, setNewAffiliateCode] = useState('');
+  const [newAffiliatePayoutRate, setNewAffiliatePayoutRate] = useState('5.00');
   const [createAffiliateLoading, setCreateAffiliateLoading] = useState(false);
+  const [showArchivedAffiliates, setShowArchivedAffiliates] = useState(false);
   
   // User search states
   const [searchEmail, setSearchEmail] = useState('');
@@ -625,8 +627,58 @@ export default function AdminDashboard() {
           {/* AFFILIATES TAB CONTENT */}
           {activeTab === 'affiliates' && (
             <div className="space-y-6">
+              {/* Affiliate Stats Header */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-green-500/20 rounded-lg text-green-500">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-sm font-medium text-text-secondary">Total Affiliates</h3>
+                  </div>
+                  <p className="text-3xl font-bold text-text-primary">{affiliatesData?.length || 0}</p>
+                </Card>
+
+                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-green-500/20 rounded-lg text-green-500">
+                      <Activity className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-sm font-medium text-text-secondary">Total Signups</h3>
+                  </div>
+                  <p className="text-3xl font-bold text-text-primary">
+                    {affiliatesData?.reduce((sum, aff) => sum + (aff.signups || 0), 0) || 0}
+                  </p>
+                </Card>
+
+                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-green-500/20 rounded-lg text-green-500">
+                      <DollarSign className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-sm font-medium text-text-secondary">Unpaid Balance</h3>
+                  </div>
+                  <p className="text-3xl font-bold text-text-primary">
+                    {formatCurrency(affiliatesData?.reduce((sum, aff) => sum + (aff.unpaidBalance > 0 ? aff.unpaidBalance : 0), 0) || 0)}
+                  </p>
+                </Card>
+              </div>
+
               {/* Action Bar */}
-              <div className="flex justify-end">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-text-primary">
+                    {showArchivedAffiliates ? 'Archived Affiliates' : 'Active Affiliates'}
+                  </h3>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowArchivedAffiliates(!showArchivedAffiliates)}
+                    className="ml-2 text-xs h-8"
+                  >
+                    {showArchivedAffiliates ? 'Show Active' : 'Show Archived'}
+                  </Button>
+                </div>
                 <Button 
                   onClick={() => setShowAffiliateForm(true)}
                   className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white"
@@ -655,6 +707,17 @@ export default function AdminDashboard() {
                         placeholder="e.g. Mike Smith" 
                         value={newAffiliateName}
                         onChange={(e) => setNewAffiliateName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-text-secondary mb-1 block">Payout Rate ($)</label>
+                      <Input 
+                        type="number"
+                        step="0.01"
+                        placeholder="5.00" 
+                        value={newAffiliatePayoutRate}
+                        onChange={(e) => setNewAffiliatePayoutRate(e.target.value)}
                         required
                       />
                     </div>
@@ -708,93 +771,105 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {affiliatesData?.length === 0 && (
-                        <tr>
-                          <td colSpan={7} className="py-8 text-center text-text-secondary">
-                            No affiliates found. Create one to get started.
-                          </td>
-                        </tr>
-                      )}
-                      {affiliatesData?.map((aff) => (
-                        <tr key={aff.id} className="hover:bg-surface-hover/50 transition-colors">
-                          <td className="py-4 px-6">
-                            <div className="font-bold text-text-primary">{aff.name}</div>
-                            <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <span className="font-mono text-xs bg-surface-paper px-2 py-1 rounded border border-border text-green-500 font-bold">
-                              {aff.code}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2 max-w-[200px]">
-                              <span className="text-xs text-text-secondary truncate font-mono select-all">
-                                {aff.referralLink}
+                      {(() => {
+                        const filteredAffiliates = affiliatesData?.filter(aff => 
+                          showArchivedAffiliates ? aff.archived : !aff.archived
+                        ) || [];
+
+                        if (filteredAffiliates.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={7} className="py-8 text-center text-text-secondary">
+                                {showArchivedAffiliates ? 'No archived affiliates found.' : 'No active affiliates found. Create one to get started.'}
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return filteredAffiliates.map((aff) => (
+                          <tr key={aff.id} className="hover:bg-surface-hover/50 transition-colors">
+                            <td className="py-4 px-6">
+                              <div className="font-bold text-text-primary">{aff.name}</div>
+                              <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className="font-mono text-xs bg-surface-paper px-2 py-1 rounded border border-border text-green-500 font-bold">
+                                {aff.code}
                               </span>
-                              <button 
-                                onClick={() => {
-                                  navigator.clipboard.writeText(aff.referralLink);
-                                  alert('Link copied!');
-                                }}
-                                className="text-text-secondary hover:text-primary"
-                                title="Copy Link"
-                              >
-                                <LinkIcon className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </td>
-                          <td className="text-right py-4 px-6">
-                            <div className="font-bold text-text-primary">{aff.signups}</div>
-                            {/* <div className="text-xs text-text-secondary">{aff.visits} visits</div> */}
-                          </td>
-                          <td className="text-right py-4 px-6 text-sm text-text-secondary">
-                            {formatCurrency(aff.payoutRate)}
-                          </td>
-                          <td className="text-right py-4 px-6">
-                            <span className={`font-bold ${aff.unpaidBalance > 0 ? 'text-green-500' : 'text-text-secondary'}`}>
-                              {formatCurrency(aff.unpaidBalance)}
-                            </span>
-                          </td>
-                          <td className="text-right py-4 px-6">
-                            <div className="flex justify-end items-center gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={aff.unpaidBalance <= 0}
-                                onClick={() => handleMarkPaid(aff.id, aff.unpaidBalance)}
-                                className={aff.unpaidBalance > 0 ? 'border-green-500/50 text-green-500 hover:bg-green-500/10' : ''}
-                                title="Mark as Paid"
-                              >
-                                Mark Paid
-                              </Button>
-                              
-                              <button 
-                                onClick={() => alert('Edit functionality coming soon')}
-                                className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors"
-                                title="Edit Affiliate"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-2 max-w-[200px]">
+                                <span className="text-xs text-text-secondary truncate font-mono select-all">
+                                  {aff.referralLink}
+                                </span>
+                                <button 
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(aff.referralLink);
+                                    alert('Link copied!');
+                                  }}
+                                  className="text-text-secondary hover:text-primary"
+                                  title="Copy Link"
+                                >
+                                  <LinkIcon className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </td>
+                            <td className="text-right py-4 px-6">
+                              <div className="font-bold text-text-primary">{aff.signups}</div>
+                            </td>
+                            <td className="text-right py-4 px-6 text-sm text-text-secondary">
+                              {formatCurrency(aff.payoutRate)}
+                            </td>
+                            <td className="text-right py-4 px-6">
+                              <span className={`font-bold ${aff.unpaidBalance > 0 ? 'text-green-500' : 'text-text-secondary'}`}>
+                                {formatCurrency(aff.unpaidBalance)}
+                              </span>
+                            </td>
+                            <td className="text-right py-4 px-6">
+                              <div className="flex justify-end items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={aff.unpaidBalance <= 0}
+                                  onClick={() => handleMarkPaid(aff.id, aff.unpaidBalance)}
+                                  className={aff.unpaidBalance > 0 ? 'border-green-500/50 text-green-500 hover:bg-green-500/10' : ''}
+                                  title="Mark as Paid"
+                                >
+                                  Mark Paid
+                                </Button>
+                                
+                                <button 
+                                  onClick={() => alert('Edit functionality coming soon')}
+                                  className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors"
+                                  title="Edit Affiliate"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
 
-                              <button 
-                                onClick={() => alert('Archive functionality coming soon')}
-                                className="p-1.5 rounded-lg text-orange-500 hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20 transition-colors"
-                                title="Archive Affiliate"
-                              >
-                                <Archive className="w-4 h-4" />
-                              </button>
+                                <button 
+                                  onClick={() => alert(showArchivedAffiliates ? 'Unarchive functionality coming soon' : 'Archive functionality coming soon')}
+                                  className={`p-1.5 rounded-lg border border-transparent transition-colors ${
+                                    showArchivedAffiliates 
+                                      ? 'text-green-500 hover:bg-green-500/10 hover:border-green-500/20' 
+                                      : 'text-orange-500 hover:bg-orange-500/10 hover:border-orange-500/20'
+                                  }`}
+                                  title={showArchivedAffiliates ? 'Unarchive Affiliate' : 'Archive Affiliate'}
+                                >
+                                  {showArchivedAffiliates ? <RefreshCw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+                                </button>
 
-                              <button 
-                                onClick={() => alert('Delete functionality coming soon')}
-                                className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors"
-                                title="Delete Affiliate"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                                <button 
+                                  onClick={() => alert('Delete functionality coming soon')}
+                                  className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors"
+                                  title="Delete Affiliate"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ));
+                      })()}
                     </tbody>
                   </table>
                 </div>
