@@ -627,40 +627,40 @@ export default function AdminDashboard() {
           {/* AFFILIATES TAB CONTENT */}
           {activeTab === 'affiliates' && (
             <div className="space-y-6">
-              {/* Affiliate Stats Header */}
+              {/* Affiliate Stats Header (Compact) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-green-500/20 rounded-lg text-green-500">
-                      <Users className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-medium text-text-secondary">Total Affiliates</h3>
+                <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Total Affiliates</h3>
+                    <p className="text-2xl font-bold text-text-primary mt-1">{affiliatesData?.length || 0}</p>
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">{affiliatesData?.length || 0}</p>
+                  <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
+                    <Users className="w-5 h-5" />
+                  </div>
                 </Card>
 
-                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-green-500/20 rounded-lg text-green-500">
-                      <Activity className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-medium text-text-secondary">Total Signups</h3>
+                <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Total Signups</h3>
+                    <p className="text-2xl font-bold text-text-primary mt-1">
+                      {affiliatesData?.reduce((sum, aff) => sum + (aff.signups || 0), 0) || 0}
+                    </p>
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">
-                    {affiliatesData?.reduce((sum, aff) => sum + (aff.signups || 0), 0) || 0}
-                  </p>
+                  <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
+                    <Activity className="w-5 h-5" />
+                  </div>
                 </Card>
 
-                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-green-500/20 rounded-lg text-green-500">
-                      <DollarSign className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-medium text-text-secondary">Unpaid Balance</h3>
+                <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Unpaid Balance</h3>
+                    <p className="text-2xl font-bold text-text-primary mt-1">
+                      {formatCurrency(affiliatesData?.reduce((sum, aff) => sum + (aff.unpaidBalance > 0 ? aff.unpaidBalance : 0), 0) || 0)}
+                    </p>
                   </div>
-                  <p className="text-3xl font-bold text-text-primary">
-                    {formatCurrency(affiliatesData?.reduce((sum, aff) => sum + (aff.unpaidBalance > 0 ? aff.unpaidBalance : 0), 0) || 0)}
-                  </p>
+                  <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
+                    <DollarSign className="w-5 h-5" />
+                  </div>
                 </Card>
               </div>
 
