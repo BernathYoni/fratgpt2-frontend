@@ -397,7 +397,7 @@ export default function AdminDashboard() {
                             </tr>
 
                             {/* Individual Model Rows */}
-                            {models.map(([modelName, stats]) => (
+                            {models.map(([modelName, stats]: [string, { inputTokens: number; outputTokens: number; cost: number }]) => (
                               <tr key={`${providerKey}-${modelName}`} className="bg-surface-paper/30 hover:bg-surface-hover/50 transition-colors border-b border-border/20">
                                 <td className="py-2 pl-12 pr-4 text-sm">
                                   <div className="flex items-center gap-2">
