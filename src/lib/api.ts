@@ -139,12 +139,19 @@ export class ApiClient {
       unlimited: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || 'price_1SRQyxCDxzHnrj8RmTIm9ye6',
     };
 
-    return this.request<{ url: string }>('/billing/create-checkout-session', {
+    const endpoint = '/billing/create-checkout-session';
+    const url = `${this.baseUrl}${endpoint}`;
+    console.log(`[API] Calling checkout endpoint: ${url}`);
+
+    return this.request<{ url: string }>(endpoint, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ priceId: priceIds[plan], affiliateCode }),
     }).then(res => {
-      if (!res.success) console.error('[API] createCheckoutSession failed:', res.error);
+      if (!res.success) {
+        console.error('[API] createCheckoutSession failed:', res.error);
+        alert(`Checkout Error: ${res.error || 'Unknown error'}\nURL: ${url}`);
+      }
       return res;
     });
   }
