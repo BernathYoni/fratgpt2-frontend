@@ -203,6 +203,7 @@ export class ApiClient {
     }>(`/admin/affiliates/${affiliateId}/mark-paid`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({}),
     });
   }
 
