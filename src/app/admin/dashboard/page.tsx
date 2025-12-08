@@ -81,6 +81,7 @@ export default function AdminDashboard() {
       if (activeTab === 'cost') {
         const res = await api.getAdminFinancials(token, startDate, endDate);
         if (res.success) {
+          console.log('Admin Financials:', res.data); // Debug log
           setFinancials(res.data);
         }
       } else if (activeTab === 'users') {
@@ -355,49 +356,70 @@ export default function AdminDashboard() {
                       {(['gemini', 'openai', 'claude'] as const).map((providerKey) => {
                         const providerData = financials.providers[providerKey];
                         const models = Object.entries(providerData.models);
-                        
-                        if (models.length === 0) {
-                           // If no models, maybe show 0 stats for provider (or skip)
-                           // But we want to show at least the provider row if it has cost?
-                           // The aggregated endpoint returns total cost/tokens at provider level too.
-                           // But models list might be empty if we didn't iterate any messages.
-                           // Let's just skip if empty for now, or show a summary row.
-                           // Actually, if the loop found no messages, models is empty.
-                           // We can show a "No usage" row?
-                           if (providerData.cost === 0) return null;
-                        }
 
-                        return models.map(([modelName, stats]) => (
-                          <tr key={`${providerKey}-${modelName}`} className="hover:bg-surface-hover/50 transition-colors">
-                            <td className="py-4 px-4">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                                  ${providerKey === 'gemini' ? 'bg-blue-500/10 text-blue-500' : ''}
-                                  ${providerKey === 'openai' ? 'bg-green-500/10 text-green-500' : ''}
-                                  ${providerKey === 'claude' ? 'bg-orange-500/10 text-orange-500' : ''}
-                                `}>
-                                  {providerKey.charAt(0).toUpperCase()}
+                        // Calculate totals for provider summary
+                        const providerInputTokens = Object.values(providerData.models).reduce((sum, m: { inputTokens: number }) => sum + m.inputTokens, 0);
+                        const providerOutputTokens = Object.values(providerData.models).reduce((sum, m: { outputTokens: number }) => sum + m.outputTokens, 0);
+                        const providerTotalTokens = providerInputTokens + providerOutputTokens;
+                        const providerCost = providerData.cost;
+
+                        if (providerCost === 0 && models.length === 0) return null; // Hide provider if no usage at all
+
+                        return (
+                          <React.Fragment key={providerKey}>
+                            {/* Provider Summary Row */}
+                            <tr className="bg-surface-paper hover:bg-surface-hover transition-colors border-b border-border/50">
+                              <td className="py-3 px-4 text-sm font-bold text-text-primary">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                                    ${providerKey === 'gemini' ? 'bg-blue-500/20 text-blue-500' : ''}
+                                    ${providerKey === 'openai' ? 'bg-green-500/20 text-green-500' : ''}
+                                    ${providerKey === 'claude' ? 'bg-orange-500/20 text-orange-500' : ''}
+                                  `}>
+                                    {providerKey.charAt(0).toUpperCase()}
+                                  </div>
+                                  {providerKey.charAt(0).toUpperCase() + providerKey.slice(1)}
                                 </div>
-                                <div>
-                                  <p className="font-medium text-text-primary">{modelName}</p>
-                                  <p className="text-xs text-text-secondary uppercase">{providerKey}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
-                              {formatNumber(stats.inputTokens)}
-                            </td>
-                            <td className="text-right py-4 px-4 text-text-secondary font-mono text-sm">
-                              {formatNumber(stats.outputTokens)}
-                            </td>
-                            <td className="text-right py-4 px-4 text-text-primary font-mono text-sm">
-                              {formatNumber(stats.inputTokens + stats.outputTokens)}
-                            </td>
-                            <td className="text-right py-4 px-4 font-bold text-text-primary">
-                              {formatCurrency(stats.cost)}
-                            </td>
-                          </tr>
-                        ));
+                              </td>
+                              <td className="text-right py-3 px-4 text-sm font-bold text-text-primary">
+                                {formatNumber(providerInputTokens)}
+                              </td>
+                              <td className="text-right py-3 px-4 text-sm font-bold text-text-primary">
+                                {formatNumber(providerOutputTokens)}
+                              </td>
+                              <td className="text-right py-3 px-4 text-sm font-bold text-text-primary">
+                                {formatNumber(providerTotalTokens)}
+                              </td>
+                              <td className="text-right py-3 px-4 text-sm font-bold text-primary">
+                                {formatCurrency(providerCost)}
+                              </td>
+                            </tr>
+
+                            {/* Individual Model Rows */}
+                            {models.map(([modelName, stats]) => (
+                              <tr key={`${providerKey}-${modelName}`} className="bg-surface-paper/30 hover:bg-surface-hover/50 transition-colors border-b border-border/20">
+                                <td className="py-2 pl-12 pr-4 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-text-secondary/50"></div>
+                                    <span className="font-medium text-text-secondary">{modelName}</span>
+                                  </div>
+                                </td>
+                                <td className="text-right py-2 px-4 text-text-secondary font-mono text-xs">
+                                  {formatNumber(stats.inputTokens)}
+                                </td>
+                                <td className="text-right py-2 px-4 text-text-secondary font-mono text-xs">
+                                  {formatNumber(stats.outputTokens)}
+                                </td>
+                                <td className="text-right py-2 px-4 text-text-secondary font-mono text-xs">
+                                  {formatNumber(stats.inputTokens + stats.outputTokens)}
+                                </td>
+                                <td className="text-right py-2 px-4 text-text-secondary font-mono text-xs">
+                                  {formatCurrency(stats.cost)}
+                                </td>
+                              </tr>
+                            ))}
+                          </React.Fragment>
+                        );
                       })}
                     </tbody>
                   </table>
