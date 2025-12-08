@@ -107,8 +107,12 @@ export default function AdminDashboard() {
     fetchData();
   }, [timeframe, activeTab, logsPage, usersPage]);
 
-  const handleResetStats = async () => {
-    if (!confirm('⚠️ DANGER: This will wipe ALL usage and cost statistics from the database. This cannot be undone.\n\nAre you sure you want to reset all stats?')) {
+  const handleResetStats = async (scope: 'all' | 'today') => {
+    const message = scope === 'today' 
+      ? '⚠️ This will wipe usage and cost statistics for TODAY only. Are you sure?'
+      : '⚠️ DANGER: This will wipe ALL usage and cost statistics from the database. This cannot be undone.\n\nAre you sure you want to reset all stats?';
+
+    if (!confirm(message)) {
       return;
     }
 
@@ -117,7 +121,7 @@ export default function AdminDashboard() {
     if (!token) return;
 
     try {
-      const res = await api.resetStats(token);
+      const res = await api.resetStats(token, scope);
       if (res.success) {
         alert('Stats reset successfully.');
         fetchData(); // Refresh data
@@ -226,7 +230,7 @@ export default function AdminDashboard() {
           <div className="h-px bg-border my-2" />
 
           <button
-            onClick={handleResetStats}
+            onClick={() => handleResetStats('all')}
             disabled={resetting}
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
           >
@@ -260,21 +264,34 @@ export default function AdminDashboard() {
 
           {/* Timeframe Selector (Hidden for Logs/Users as they use pagination) */}
           {activeTab === 'cost' && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
-              <Calendar className="w-4 h-4 text-text-secondary hidden md:block" />
-              {(['today', 'yesterday', 'week', 'month', 'year', 'all'] as Timeframe[]).map((tf) => (
-                <button
-                  key={tf}
-                  onClick={() => setTimeframe(tf)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${ 
-                    timeframe === tf
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'bg-surface-hover text-text-secondary hover:bg-surface-highlight'
-                  }`}
-                >
-                  {tf.charAt(0).toUpperCase() + tf.slice(1)}
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
+                <Calendar className="w-4 h-4 text-text-secondary hidden md:block" />
+                {(['today', 'yesterday', 'week', 'month', 'year', 'all'] as Timeframe[]).map((tf) => (
+                  <button
+                    key={tf}
+                    onClick={() => setTimeframe(tf)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${ 
+                      timeframe === tf
+                        ? 'bg-primary/20 text-primary border border-primary/30'
+                        : 'bg-surface-hover text-text-secondary hover:bg-surface-highlight'
+                    }`}
+                  >
+                    {tf.charAt(0).toUpperCase() + tf.slice(1)}
+                  </button>
+                ))}
+              </div>
+              
+              <div className="h-6 w-px bg-border mx-2 hidden md:block"></div>
+
+              <button 
+                onClick={() => handleResetStats('today')}
+                disabled={resetting}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-500/10 border border-red-500/20 transition-colors whitespace-nowrap"
+              >
+                <Trash2 className="w-3 h-3" />
+                Reset Today
+              </button>
             </div>
           )}
         </div>

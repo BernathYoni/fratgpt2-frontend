@@ -328,14 +328,14 @@ export class ApiClient {
     });
   }
 
-  async resetStats(token: string) {
+  async resetStats(token: string, scope: 'all' | 'today' = 'all') {
     return this.request<{
       deletedAdminStats: number;
       deletedUsage: number;
     }>('/admin/reset-stats', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ scope }),
     });
   }
 }
