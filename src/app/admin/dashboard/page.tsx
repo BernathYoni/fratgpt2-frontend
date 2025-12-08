@@ -765,6 +765,7 @@ export default function AdminDashboard() {
                         <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Code</th>
                         <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Referral Link</th>
                         <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Signups</th>
+                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Unpaid Signups</th>
                         <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Rate</th>
                         <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Unpaid Balance</th>
                         <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Actions</th>
@@ -779,7 +780,7 @@ export default function AdminDashboard() {
                         if (filteredAffiliates.length === 0) {
                           return (
                             <tr>
-                              <td colSpan={7} className="py-8 text-center text-text-secondary">
+                              <td colSpan={8} className="py-8 text-center text-text-secondary">
                                 {showArchivedAffiliates ? 'No archived affiliates found.' : 'No active affiliates found. Create one to get started.'}
                               </td>
                             </tr>
@@ -816,6 +817,11 @@ export default function AdminDashboard() {
                             </td>
                             <td className="text-right py-4 px-6">
                               <div className="font-bold text-text-primary">{aff.signups}</div>
+                            </td>
+                            <td className="text-right py-4 px-6">
+                              <div className={`font-bold ${aff.unpaidSignups > 0 ? 'text-orange-500' : 'text-text-secondary'}`}>
+                                {aff.unpaidSignups}
+                              </div>
                             </td>
                             <td className="text-right py-4 px-6 text-sm text-text-secondary">
                               {formatCurrency(aff.payoutRate)}

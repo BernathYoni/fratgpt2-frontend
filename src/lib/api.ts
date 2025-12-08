@@ -177,6 +177,7 @@ export class ApiClient {
       amountPaid: number;
       referredUsersCount: number;
       unpaidBalance: number;
+      unpaidSignups: number;
       createdAt: string;
     }>>('/admin/affiliates', {
       headers: { Authorization: `Bearer ${token}` },
