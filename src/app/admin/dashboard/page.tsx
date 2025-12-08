@@ -356,7 +356,7 @@ export default function AdminDashboard() {
                     <tbody className="divide-y divide-border">
                       {(['gemini', 'openai', 'claude'] as const).map((providerKey) => {
                         const providerData = financials.providers[providerKey];
-                        const models = Object.entries(providerData.models);
+                        const models = Object.entries(providerData.models) as [string, { inputTokens: number; outputTokens: number; cost: number }][];
 
                         // Calculate totals for provider summary
                         const providerInputTokens = Object.values(providerData.models).reduce((sum: number, m: any) => sum + (m.inputTokens || 0), 0);
