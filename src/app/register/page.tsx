@@ -46,7 +46,12 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const registerRes = await api.register(email, password);
+      // Get affiliate code if exists
+      const affiliateCode = localStorage.getItem('fratgpt_affiliate_ref') || undefined;
+      if (affiliateCode) console.log('[REGISTER] Applying affiliate code:', affiliateCode);
+
+      // Pass affiliateCode as 5th argument (firstName/lastName undefined)
+      const registerRes = await api.register(email, password, undefined, undefined, affiliateCode);
 
       if (!registerRes.success || !registerRes.data?.token) {
         const errorMsg = registerRes.error || 'Registration failed';
