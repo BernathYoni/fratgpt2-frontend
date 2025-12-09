@@ -433,6 +433,10 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
             <thead>
               <tr className="bg-surface-paper border-b border-border">
                 <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Partner</th>
+                <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Phone</th>
+                <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Venmo</th>
+                <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Code</th>
+                <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Referral Link</th>
                 <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Signups</th>
                 <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Unpaid Signups</th>
                 <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Rate</th>
@@ -449,7 +453,7 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                 if (filteredAffiliates.length === 0) {
                   return (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-text-secondary">
+                      <td colSpan={10} className="py-8 text-center text-text-secondary">
                         {showArchivedAffiliates ? 'No archived affiliates found.' : 'No active affiliates found. Create one to get started.'}
                       </td>
                     </tr>
@@ -464,12 +468,31 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                       <div className="text-[10px] font-mono text-text-secondary mt-1">
                         Manager: {aff.paymentManager || 'Unassigned'}
                       </div>
-                      {(aff.phoneNumber || aff.venmoHandle) && (
-                        <div className="mt-1 space-y-0.5">
-                          {aff.phoneNumber && <div className="text-[10px] text-text-secondary">📞 {aff.phoneNumber}</div>}
-                          {aff.venmoHandle && <div className="text-[10px] text-text-secondary">💸 {aff.venmoHandle}</div>}
-                        </div>
-                      )}
+                    </td>
+                    <td className="py-4 px-6 text-sm text-text-secondary">
+                      {aff.phoneNumber || '-'}
+                    </td>
+                    <td className="py-4 px-6 text-sm text-text-secondary">
+                      {aff.venmoHandle || '-'}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="font-mono text-xs bg-surface-paper px-2 py-1 rounded border border-border text-green-500 font-bold">
+                        {aff.code}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2 max-w-[200px]">
+                        <span className="text-xs text-text-secondary truncate font-mono select-all">
+                          {aff.referralLink}
+                        </span>
+                        <button 
+                          onClick={() => handleCopyLink(aff.referralLink, aff.id)}
+                          className="p-1.5 rounded-lg text-text-secondary hover:text-primary border border-transparent hover:bg-surface-hover transition-colors relative"
+                          title="Copy Link"
+                        >
+                          {copiedId === aff.id ? <Check className="w-3 h-3" /> : <LinkIcon className="w-3 h-3" />}
+                        </button>
+                      </div>
                     </td>
                     <td className="text-right py-4 px-6">
                       <div className="font-bold text-text-primary">{aff.signups}</div>
