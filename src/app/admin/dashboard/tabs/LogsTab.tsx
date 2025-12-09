@@ -91,77 +91,111 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
           >
             {/* Clickable wrapper */}
             <div
-              className="space-y-4 cursor-pointer -m-6 p-6"
+              className="cursor-pointer -m-6 p-6"
               onClick={() => toggleLogExpand(log.id)}
             >
-              {/* Header Row - Action Type, Time, User, Expand Icon */}
-              <div className="flex items-start justify-between gap-4">
-                {/* Prominent Action Type */}
+              {/* Top Section - Action Type & Metadata */}
+              <div className="flex items-center justify-between mb-4">
+                {/* Left: Action Type with badges */}
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl font-bold text-orange-500">Solve</span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getModeBadgeStyles(log.mode)}`}>
-                    {log.mode}
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
-                    {getSolveMethod(log)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                      <MessageSquare className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                      Solve
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${getModeBadgeStyles(log.mode)}`}>
+                      {log.mode}
+                    </span>
+                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 shadow-sm">
+                      {getSolveMethod(log)}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Right side - Time, User, Expand */}
-                <div className="flex items-center gap-4 flex-shrink-0">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-text-secondary" />
-                    <span className="text-sm text-text-secondary whitespace-nowrap">
-                      {formatDateTime(log.createdAt)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-text-secondary" />
-                    <span className="text-sm text-text-primary font-medium">
-                      {log.user.email}
-                    </span>
-                  </div>
+                {/* Right: Expand Icon */}
+                <div className="flex items-center gap-3">
                   {expandedLogId === log.id ? (
-                    <ChevronUp className="w-5 h-5 text-text-secondary" />
+                    <ChevronUp className="w-6 h-6 text-orange-500" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-text-secondary" />
+                    <ChevronDown className="w-6 h-6 text-gray-400" />
                   )}
                 </div>
               </div>
 
+              {/* User & Time Row */}
+              <div className="flex items-center gap-6 mb-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <User className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="font-medium text-gray-700">
+                    {log.user.email}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-sm">
+                    {formatDateTime(log.createdAt)}
+                  </span>
+                </div>
+              </div>
+
               {/* Input Preview */}
-              <div className="flex items-start gap-3">
-                <MessageSquare className="w-4 h-4 text-text-secondary flex-shrink-0 mt-1" />
-                <p className="text-sm text-text-secondary line-clamp-2 flex-1">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 mb-4 border border-gray-200">
+                <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
                   {log.input.text}
                 </p>
               </div>
 
-              {/* Cost Breakdown Row */}
-              <div className="flex items-center justify-between gap-4 pt-3 border-t border-border">
-                {/* Total Cost */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-text-secondary font-medium">Total Cost:</span>
-                  <span className="text-lg font-bold text-text-primary">
+              {/* Cost Breakdown Section */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    <span className="text-sm font-semibold text-gray-600">Total Cost</span>
+                  </div>
+                  <span className="text-2xl font-bold text-green-600">
                     {formatCurrency(log.totalCost)}
                   </span>
                 </div>
 
-                {/* Model Costs */}
-                <div className="flex items-center gap-4 flex-wrap">
+                {/* Model-by-Model Breakdown */}
+                <div className="space-y-2">
                   {log.outputs.map((out: any, i: number) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-text-secondary">
-                        {getModelName(out.provider, log.mode)}:
-                      </span>
-                      <span className="text-sm font-semibold text-text-primary">
-                        {formatCurrency(out.cost)}
-                      </span>
-                      {out.metadata?.tokenUsage && (
-                        <span className="text-xs text-text-secondary">
-                          ({out.metadata.tokenUsage.inputTokens}in / {out.metadata.tokenUsage.outputTokens}out
-                          {out.metadata.tokenUsage.thinkingTokens > 0 && ` / ${out.metadata.tokenUsage.thinkingTokens}think`})
+                    <div key={i} className="bg-white/70 backdrop-blur rounded-lg p-3 border border-green-100">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-bold text-gray-800">
+                          {getModelName(out.provider, log.mode)}
                         </span>
+                        <span className="text-lg font-bold text-green-700">
+                          {formatCurrency(out.cost)}
+                        </span>
+                      </div>
+                      {out.metadata?.tokenUsage && (
+                        <div className="flex items-center gap-3 text-xs text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <span className="font-semibold text-blue-600">{out.metadata.tokenUsage.inputTokens}</span>
+                            <span>input</span>
+                          </div>
+                          <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-semibold text-purple-600">{out.metadata.tokenUsage.outputTokens}</span>
+                            <span>output</span>
+                          </div>
+                          {out.metadata.tokenUsage.thinkingTokens > 0 && (
+                            <>
+                              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-semibold text-orange-600">{out.metadata.tokenUsage.thinkingTokens}</span>
+                                <span>thinking</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       )}
                     </div>
                   ))}
