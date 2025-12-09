@@ -160,43 +160,6 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Affiliate Stats Header (Compact) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
-          <div>
-            <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Total Affiliates</h3>
-            <p className="text-2xl font-bold text-text-primary mt-1">{data?.length || 0}</p>
-          </div>
-          <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
-            <Users className="w-5 h-5" />
-          </div>
-        </Card>
-
-        <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
-          <div>
-            <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Total Signups</h3>
-            <p className="text-2xl font-bold text-text-primary mt-1">
-              {data?.reduce((sum, aff) => sum + (aff.signups || 0), 0) || 0}
-            </p>
-          </div>
-          <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
-            <Activity className="w-5 h-5" />
-          </div>
-        </Card>
-
-        <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
-          <div>
-            <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Unpaid Balance</h3>
-            <p className="text-2xl font-bold text-text-primary mt-1">
-              {formatCurrency(data?.reduce((sum, aff) => sum + (aff.unpaidBalance > 0 ? aff.unpaidBalance : 0), 0) || 0)}
-            </p>
-          </div>
-          <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
-            <DollarSign className="w-5 h-5" />
-          </div>
-        </Card>
-      </div>
-
       {/* Action Bar */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -425,6 +388,43 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
           </form>
         </Card>
       )}
+
+      {/* Affiliate Stats Header (Compact) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Total Affiliates</h3>
+            <p className="text-2xl font-bold text-text-primary mt-1">{data?.length || 0}</p>
+          </div>
+          <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
+            <Users className="w-5 h-5" />
+          </div>
+        </Card>
+
+        <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Total Signups</h3>
+            <p className="text-2xl font-bold text-text-primary mt-1">
+              {data?.reduce((sum, aff) => sum + (aff.signups || 0), 0) || 0}
+            </p>
+          </div>
+          <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
+            <Activity className="w-5 h-5" />
+          </div>
+        </Card>
+
+        <Card className="p-4 border-green-500/30 bg-gradient-to-br from-surface-paper to-green-500/5 flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-medium text-text-secondary uppercase tracking-wider">Unpaid Balance</h3>
+            <p className="text-2xl font-bold text-text-primary mt-1">
+              {formatCurrency(data?.reduce((sum, aff) => sum + (aff.unpaidBalance > 0 ? aff.unpaidBalance : 0), 0) || 0)}
+            </p>
+          </div>
+          <div className="p-2 bg-green-500/10 rounded-lg text-green-500">
+            <DollarSign className="w-5 h-5" />
+          </div>
+        </Card>
+      </div>
 
       {/* Affiliates Table */}
       <Card className="overflow-hidden">
