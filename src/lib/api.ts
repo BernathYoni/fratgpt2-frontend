@@ -178,6 +178,13 @@ export class ApiClient {
       paymentManager?: string;
       phoneNumber?: string;
       venmoHandle?: string;
+      collegeId?: string;
+      college?: {
+        id: string;
+        name: string;
+        state: string;
+        city?: string;
+      };
       archived: boolean;
       referredUsersCount: number;
       unpaidBalance: number;
