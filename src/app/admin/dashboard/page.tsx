@@ -216,60 +216,62 @@ export default function AdminDashboard() {
       <div className="flex flex-col gap-8">
         
         {/* Content Header (Title + Timeframe) */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-paper p-4 rounded-xl border border-border">
-          <div>
-            <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-              {activeTab === 'cost' && <DollarSign className="w-5 h-5 text-orange-500" />}
-              {activeTab === 'users' && <Users className="w-5 h-5 text-purple-500" />}
-              {activeTab === 'logs' && <FileText className="w-5 h-5 text-blue-500" />}
-              {activeTab === 'affiliates' && <LinkIcon className="w-5 h-5 text-green-500" />}
-              
-              {activeTab === 'cost' && 'Financial Overview'}
-              {activeTab === 'users' && 'User Management'}
-              {activeTab === 'logs' && 'System Logs'}
-              {activeTab === 'affiliates' && 'Affiliate Program'}
-            </h2>
-            <p className="text-xs text-text-secondary mt-1">
-              {activeTab === 'cost' && 'Track API costs and token consumption'}
-              {activeTab === 'users' && 'View all users and their lifetime value'}
-              {activeTab === 'logs' && 'Detailed inspection of all system interactions'}
-              {activeTab === 'affiliates' && 'Manage partners and payouts ($5/user)'}
-            </p>
-          </div>
-
-          {/* Timeframe Selector (Hidden for Logs/Users as they use pagination) */}
-          {activeTab === 'cost' && (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
-                <Calendar className="w-4 h-4 text-text-secondary hidden md:block" />
-                {(['today', 'yesterday', 'week', 'month', 'year', 'all'] as Timeframe[]).map((tf) => (
-                  <button
-                    key={tf}
-                    onClick={() => setTimeframe(tf)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${ 
-                      timeframe === tf
-                        ? 'bg-primary/20 text-primary border border-primary/30'
-                        : 'bg-surface-hover text-text-secondary hover:bg-surface-highlight'
-                    }`}
-                  >
-                    {tf.charAt(0).toUpperCase() + tf.slice(1)}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="h-6 w-px bg-border mx-2 hidden md:block"></div>
-
-              <button 
-                onClick={() => handleResetStats('today')}
-                disabled={resetting}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-500/10 border border-red-500/20 transition-colors whitespace-nowrap"
-              >
-                <Trash2 className="w-3 h-3" />
-                Reset Today
-              </button>
+        {activeTab !== 'affiliates' && (
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-paper p-4 rounded-xl border border-border">
+            <div>
+              <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
+                {activeTab === 'cost' && <DollarSign className="w-5 h-5 text-orange-500" />}
+                {activeTab === 'users' && <Users className="w-5 h-5 text-purple-500" />}
+                {activeTab === 'logs' && <FileText className="w-5 h-5 text-blue-500" />}
+                {activeTab === 'affiliates' && <LinkIcon className="w-5 h-5 text-green-500" />}
+                
+                {activeTab === 'cost' && 'Financial Overview'}
+                {activeTab === 'users' && 'User Management'}
+                {activeTab === 'logs' && 'System Logs'}
+                {activeTab === 'affiliates' && 'Affiliate Program'}
+              </h2>
+              <p className="text-xs text-text-secondary mt-1">
+                {activeTab === 'cost' && 'Track API costs and token consumption'}
+                {activeTab === 'users' && 'View all users and their lifetime value'}
+                {activeTab === 'logs' && 'Detailed inspection of all system interactions'}
+                {activeTab === 'affiliates' && 'Affiliate Program'}
+              </p>
             </div>
-          )}
-        </div>
+
+            {/* Timeframe Selector (Hidden for Logs/Users as they use pagination) */}
+            {activeTab === 'cost' && (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
+                  <Calendar className="w-4 h-4 text-text-secondary hidden md:block" />
+                  {(['today', 'yesterday', 'week', 'month', 'year', 'all'] as Timeframe[]).map((tf) => (
+                    <button
+                      key={tf}
+                      onClick={() => setTimeframe(tf)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${ 
+                        timeframe === tf
+                          ? 'bg-primary/20 text-primary border border-primary/30'
+                          : 'bg-surface-hover text-text-secondary hover:bg-surface-highlight'
+                      }`}
+                    >
+                      {tf.charAt(0).toUpperCase() + tf.slice(1)}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="h-6 w-px bg-border mx-2 hidden md:block"></div>
+
+                <button 
+                  onClick={() => handleResetStats('today')}
+                  disabled={resetting}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-500/10 border border-red-500/20 transition-colors whitespace-nowrap"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Reset Today
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Dynamic Content */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
