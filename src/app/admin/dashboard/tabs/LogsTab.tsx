@@ -94,13 +94,20 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
               className="cursor-pointer -m-6 p-6"
               onClick={() => toggleLogExpand(log.id)}
             >
-              {/* Top Section - Action Type & Metadata */}
-              <div className="flex items-center justify-between">
-                {/* Left: Action Type with badges */}
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+              {/* Top Section - Input text on left, metadata on right */}
+              <div className="flex items-center justify-between gap-4">
+                {/* Left: Chat icon + Input text preview */}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg flex-shrink-0">
                     <MessageSquare className="w-6 h-6 text-white" />
                   </div>
+                  <p className="text-sm text-gray-700 line-clamp-1 flex-1">
+                    {log.input.text}
+                  </p>
+                </div>
+
+                {/* Right: Action type, User, Time, Total Cost, Expand Icon */}
+                <div className="flex items-center gap-4 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${getModeBadgeStyles(log.mode)}`}>
                       {log.mode}
@@ -109,10 +116,6 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                       {getSolveMethod(log)}
                     </span>
                   </div>
-                </div>
-
-                {/* Right: User, Time, Total Cost, Expand Icon */}
-                <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                       <User className="w-4 h-4 text-blue-600" />
