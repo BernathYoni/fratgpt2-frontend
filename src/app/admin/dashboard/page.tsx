@@ -223,18 +223,15 @@ export default function AdminDashboard() {
                 {activeTab === 'cost' && <DollarSign className="w-5 h-5 text-orange-500" />}
                 {activeTab === 'users' && <Users className="w-5 h-5 text-purple-500" />}
                 {activeTab === 'logs' && <FileText className="w-5 h-5 text-blue-500" />}
-                {activeTab === 'affiliates' && <LinkIcon className="w-5 h-5 text-green-500" />}
                 
                 {activeTab === 'cost' && 'Financial Overview'}
                 {activeTab === 'users' && 'User Management'}
                 {activeTab === 'logs' && 'System Logs'}
-                {activeTab === 'affiliates' && 'Affiliate Program'}
               </h2>
               <p className="text-xs text-text-secondary mt-1">
                 {activeTab === 'cost' && 'Track API costs and token consumption'}
                 {activeTab === 'users' && 'View all users and their lifetime value'}
                 {activeTab === 'logs' && 'Detailed inspection of all system interactions'}
-                {activeTab === 'affiliates' && 'Affiliate Program'}
               </p>
             </div>
 
