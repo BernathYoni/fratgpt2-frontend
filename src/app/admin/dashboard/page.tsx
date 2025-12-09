@@ -138,7 +138,7 @@ export default function AdminDashboard() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
       {/* SIDEBAR */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 sticky top-0 h-screen overflow-y-auto pb-4">
         {/* Sidebar Header */}
         <div className="flex items-center gap-3 mb-2 px-2">
           <div className="w-8 h-8 bg-gradient-to-br from-pink-500/20 via-orange-500/20 to-yellow-500/20 rounded-lg flex items-center justify-center border border-orange-500/30">

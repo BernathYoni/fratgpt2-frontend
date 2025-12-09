@@ -46,7 +46,7 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
 
     try {
       const res = await api.createAffiliate(token, {
-        name: newAffiliateName, 
+        name: capitalizeWords(newAffiliateName), 
         code: newAffiliateCode || undefined, 
         payoutRate: parseFloat(newAffiliatePayoutRate),
         paymentManager: newPaymentManager,
@@ -92,7 +92,7 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
 
     try {
       const res = await api.updateAffiliate(token, editingAffiliate.id, {
-        name: editName,
+        name: capitalizeWords(editName),
         payoutRate: parseFloat(editPayoutRate),
         paymentManager: editPaymentManager,
         phoneNumber: editPhoneNumber || undefined,
