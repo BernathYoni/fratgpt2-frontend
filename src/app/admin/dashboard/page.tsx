@@ -804,127 +804,113 @@ export default function AdminDashboard() {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-surface-paper border-b border-border">
-                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Partner</th>
-                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Manager</th>
-                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Code</th>
-                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Referral Link</th>
-                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Signups</th>
-                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Unpaid Signups</th>
-                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Rate</th>
-                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Unpaid Balance</th>
-                        <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {(() => {
-                        const filteredAffiliates = affiliatesData?.filter(aff => 
-                          showArchivedAffiliates ? aff.archived : !aff.archived
-                        ) || [];
-
-                        if (filteredAffiliates.length === 0) {
-                          return (
-                            <tr>
-                              <td colSpan={9} className="py-8 text-center text-text-secondary">
-                                {showArchivedAffiliates ? 'No archived affiliates found.' : 'No active affiliates found. Create one to get started.'}
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        return filteredAffiliates.map((aff) => (
-                          <tr key={aff.id} className="hover:bg-surface-hover/50 transition-colors">
-                            <td className="py-4 px-6">
-                              <div className="font-bold text-text-primary">{aff.name}</div>
-                              <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
-                            </td>
-                            <td className="py-4 px-6">
-                              <span className="text-sm bg-blue-500/10 text-blue-500 px-2 py-1 rounded border border-blue-500/20">
-                                {aff.paymentManager || 'Unassigned'}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6">
-                              <span className="font-mono text-xs bg-surface-paper px-2 py-1 rounded border border-border text-green-500 font-bold">
-                                {aff.code}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6">
-                              <div className="flex items-center gap-2 max-w-[200px]">
-                                <span className="text-xs text-text-secondary truncate font-mono select-all">
-                                  {aff.referralLink}
-                                </span>
-                                <button 
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(aff.referralLink);
-                                    alert('Link copied!');
-                                  }}
-                                  className="text-text-secondary hover:text-primary"
-                                  title="Copy Link"
-                                >
-                                  <LinkIcon className="w-3 h-3" />
-                                </button>
-                              </div>
-                            </td>
-                            <td className="text-right py-4 px-6">
-                              <div className="font-bold text-text-primary">{aff.signups}</div>
-                            </td>
-                            <td className="text-right py-4 px-6">
-                              <div className={`font-bold ${aff.unpaidSignups > 0 ? 'text-orange-500' : 'text-text-secondary'}`}>
-                                {aff.unpaidSignups}
-                              </div>
-                            </td>
-                            <td className="text-right py-4 px-6 text-sm text-text-secondary">
-                              {formatCurrency(aff.payoutRate)}
-                            </td>
-                            <td className="text-right py-4 px-6">
-                              <span className={`font-bold ${aff.unpaidBalance > 0 ? 'text-green-500' : 'text-text-secondary'}`}>
-                                {formatCurrency(aff.unpaidBalance)}
-                              </span>
-                            </td>
-                            <td className="text-right py-4 px-6">
-                              <div className="flex justify-end items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={aff.unpaidBalance <= 0}
-                                  onClick={() => handleMarkPaid(aff.id, aff.unpaidBalance)}
-                                  className={aff.unpaidBalance > 0 ? 'border-green-500/50 text-green-500 hover:bg-green-500/10' : ''}
-                                  title="Mark as Paid"
-                                >
-                                  Mark Paid
-                                </Button>
-                                
-                                <button 
-                                  onClick={() => alert('Edit functionality coming soon')}
-                                  className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors"
-                                  title="Edit Affiliate"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </button>
-
-                                <button 
-                                  onClick={() => handleArchive(aff.id, aff.archived)}
-                                  className={`p-1.5 rounded-lg border border-transparent transition-colors ${ 
-                                    showArchivedAffiliates 
-                                      ? 'text-green-500 hover:bg-green-500/10 hover:border-green-500/20' 
-                                      : 'text-orange-500 hover:bg-orange-500/10 hover:border-orange-500/20'
-                                  }`}
-                                  title={showArchivedAffiliates ? 'Unarchive Affiliate' : 'Archive Affiliate'}
-                                >
-                                  {showArchivedAffiliates ? <RefreshCw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
-                                </button>
-
-                                <button 
-                                  onClick={() => handleDelete(aff.id)}
-                                  className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors"
-                                  title="Delete Affiliate"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ));
-                      })()}
+                                                <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Partner</th>
+                                                <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Manager</th>
+                                                <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Signups</th>
+                                                <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Unpaid Signups</th>
+                                                <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Rate</th>
+                                                <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Unpaid Balance</th>
+                                                <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Actions</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-border">
+                                              {(() => {
+                                                const filteredAffiliates = affiliatesData?.filter(aff => 
+                                                  showArchivedAffiliates ? aff.archived : !aff.archived
+                                                ) || [];
+                        
+                                                if (filteredAffiliates.length === 0) {
+                                                  return (
+                                                    <tr>
+                                                      <td colSpan={7} className="py-8 text-center text-text-secondary">
+                                                        {showArchivedAffiliates ? 'No archived affiliates found.' : 'No active affiliates found. Create one to get started.'}
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                }
+                        
+                                                return filteredAffiliates.map((aff) => (
+                                                  <tr key={aff.id} className="hover:bg-surface-hover/50 transition-colors">
+                                                    <td className="py-4 px-6">
+                                                      <div className="font-bold text-text-primary">{aff.name}</div>
+                                                      <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
+                                                    </td>
+                                                    <td className="py-4 px-6">
+                                                      <span className="text-sm bg-blue-500/10 text-blue-500 px-2 py-1 rounded border border-blue-500/20">
+                                                        {aff.paymentManager || 'Unassigned'}
+                                                      </span>
+                                                    </td>
+                                                    <td className="text-right py-4 px-6">
+                                                      <div className="font-bold text-text-primary">{aff.signups}</div>
+                                                    </td>
+                                                    <td className="text-right py-4 px-6">
+                                                      <div className={`font-bold ${aff.unpaidSignups > 0 ? 'text-orange-500' : 'text-text-secondary'}`}>
+                                                        {aff.unpaidSignups}
+                                                      </div>
+                                                    </td>
+                                                    <td className="text-right py-4 px-6 text-sm text-text-secondary">
+                                                      {formatCurrency(aff.payoutRate)}
+                                                    </td>
+                                                    <td className="text-right py-4 px-6">
+                                                      <span className={`font-bold ${aff.unpaidBalance > 0 ? 'text-green-500' : 'text-text-secondary'}`}>
+                                                        {formatCurrency(aff.unpaidBalance)}
+                                                      </span>
+                                                    </td>
+                                                    <td className="text-right py-4 px-6">
+                                                      <div className="flex justify-end items-center gap-2">
+                                                        <button 
+                                                          onClick={() => {
+                                                            navigator.clipboard.writeText(aff.referralLink);
+                                                            alert('Link copied!');
+                                                          }}
+                                                          className="p-1.5 rounded-lg text-text-secondary hover:text-primary border border-transparent hover:bg-surface-hover transition-colors"
+                                                          title="Copy Link"
+                                                        >
+                                                          <LinkIcon className="w-4 h-4" />
+                                                        </button>
+                        
+                                                        <Button
+                                                          size="sm"
+                                                          variant="outline"
+                                                          disabled={aff.unpaidBalance <= 0}
+                                                          onClick={() => handleMarkPaid(aff.id, aff.unpaidBalance)}
+                                                          className={aff.unpaidBalance > 0 ? 'border-green-500/50 text-green-500 hover:bg-green-500/10' : ''}
+                                                          title="Mark as Paid"
+                                                        >
+                                                          Mark Paid
+                                                        </Button>
+                                                        
+                                                        <button 
+                                                          onClick={() => alert('Edit functionality coming soon')}
+                                                          className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors"
+                                                          title="Edit Affiliate"
+                                                        >
+                                                          <Edit className="w-4 h-4" />
+                                                        </button>
+                        
+                                                        <button 
+                                                          onClick={() => handleArchive(aff.id, aff.archived)}
+                                                          className={`p-1.5 rounded-lg border border-transparent transition-colors ${
+                                                            showArchivedAffiliates 
+                                                              ? 'text-green-500 hover:bg-green-500/10 hover:border-green-500/20' 
+                                                              : 'text-orange-500 hover:bg-orange-500/10 hover:border-orange-500/20'
+                                                          }`}
+                                                          title={showArchivedAffiliates ? 'Unarchive Affiliate' : 'Archive Affiliate'}
+                                                        >
+                                                          {showArchivedAffiliates ? <RefreshCw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+                                                        </button>
+                        
+                                                        <button 
+                                                          onClick={() => handleDelete(aff.id)}
+                                                          className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors"
+                                                          title="Delete Affiliate"
+                                                        >
+                                                          <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                      </div>
+                                                    </td>
+                                                  </tr>
+                                                ));                      })()}
                     </tbody>
                   </table>
                 </div>
