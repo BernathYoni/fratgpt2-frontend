@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Users, Activity, DollarSign, Plus, X, Edit, Archive, RefreshCw, Trash2, Link as LinkIcon } from 'lucide-react';
+import { Users, Activity, DollarSign, Plus, X, Edit, Archive, RefreshCw, Trash2, Link as LinkIcon, Check } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils';
 import { api } from '@/lib/api';
 import { getToken } from '@/lib/auth';
@@ -13,17 +13,30 @@ interface AffiliatesTabProps {
 }
 
 export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
+  // Create Form State
   const [showAffiliateForm, setShowAffiliateForm] = useState(false);
   const [newAffiliateName, setNewAffiliateName] = useState('');
   const [newAffiliateCode, setNewAffiliateCode] = useState('');
   const [newAffiliatePayoutRate, setNewAffiliatePayoutRate] = useState('5.00');
   const [newPaymentManager, setNewPaymentManager] = useState('Yoni');
   const [createAffiliateLoading, setCreateAffiliateLoading] = useState(false);
+  const [createError, setCreateError] = useState('');
+
+  // Edit Form State
+  const [editingAffiliate, setEditingAffiliate] = useState<any | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPayoutRate, setEditPayoutRate] = useState('');
+  const [editPaymentManager, setEditPaymentManager] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState('');
+
   const [showArchivedAffiliates, setShowArchivedAffiliates] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCreateAffiliate = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreateAffiliateLoading(true);
+    setCreateError('');
     const token = getToken();
     if (!token) return;
 
@@ -36,20 +49,55 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
         newPaymentManager
       );
       if (res.success) {
-        alert('Affiliate created successfully!');
         setShowAffiliateForm(false);
         setNewAffiliateName('');
         setNewAffiliateCode('');
         setNewAffiliatePayoutRate('5.00');
         onRefresh();
       } else {
-        alert('Failed to create affiliate: ' + res.error);
+        setCreateError(res.error || 'Failed to create affiliate');
       }
     } catch (err) {
       console.error(err);
-      alert('Error creating affiliate');
+      setCreateError('Error creating affiliate');
     } finally {
       setCreateAffiliateLoading(false);
+    }
+  };
+
+  const handleEditClick = (aff: any) => {
+    setEditingAffiliate(aff);
+    setEditName(aff.name);
+    setEditPayoutRate(aff.payoutRate.toString());
+    setEditPaymentManager(aff.paymentManager || 'Yoni');
+    setEditError('');
+  };
+
+  const handleUpdateAffiliate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAffiliate) return;
+    setEditLoading(true);
+    setEditError('');
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const res = await api.updateAffiliate(token, editingAffiliate.id, {
+        name: editName,
+        payoutRate: parseFloat(editPayoutRate),
+        paymentManager: editPaymentManager
+      });
+
+      if (res.success) {
+        setEditingAffiliate(null);
+        onRefresh();
+      } else {
+        setEditError(res.error || 'Failed to update affiliate');
+      }
+    } catch (err) {
+      setEditError('Error updating affiliate');
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -91,6 +139,12 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleCopyLink = (link: string, id: string) => {
+    navigator.clipboard.writeText(link);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (
@@ -215,6 +269,13 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                 title="Uppercase letters, numbers, underscores, and dashes only"
               />
             </div>
+            
+            {createError && (
+              <div className="text-sm text-red-500 bg-red-500/10 p-2 rounded">
+                {createError}
+              </div>
+            )}
+
             <div className="flex justify-end gap-3 mt-2">
               <Button 
                 type="button" 
@@ -230,6 +291,88 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                 disabled={createAffiliateLoading}
               >
                 {createAffiliateLoading ? 'Creating...' : 'Create Affiliate'}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
+      {/* Edit Affiliate Modal/Form */}
+      {editingAffiliate && (
+        <Card className="p-6 border-blue-500/30 bg-surface-paper/50 mb-6">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-lg font-bold text-text-primary">Edit Affiliate</h3>
+            <button 
+              onClick={() => setEditingAffiliate(null)}
+              className="text-text-secondary hover:text-text-primary"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <form onSubmit={handleUpdateAffiliate} className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-text-secondary mb-1 block">Partner Name</label>
+                <Input 
+                  placeholder="e.g. Mike Smith" 
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-text-secondary mb-1 block">Payment Manager</label>
+                <select 
+                  className="w-full p-2 rounded-lg bg-background border border-input border-border focus:border-primary outline-none text-text-primary"
+                  value={editPaymentManager}
+                  onChange={(e) => setEditPaymentManager(e.target.value)}
+                >
+                  <option value="Yoni">Yoni Bernath</option>
+                  <option value="Ethan">Ethan Levine</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-text-secondary mb-1 block">Payout Rate ($)</label>
+              <Input 
+                type="number"
+                step="0.01"
+                placeholder="5.00" 
+                value={editPayoutRate}
+                onChange={(e) => setEditPayoutRate(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-text-secondary mb-1 block">
+                Code (Read-only)
+              </label>
+              <div className="p-2 rounded-lg bg-surface-hover border border-border text-text-secondary font-mono text-sm">
+                {editingAffiliate.code}
+              </div>
+            </div>
+            
+            {editError && (
+              <div className="text-sm text-red-500 bg-red-500/10 p-2 rounded">
+                {editError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 mt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setEditingAffiliate(null)}
+                disabled={editLoading}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+                disabled={editLoading}
+              >
+                {editLoading ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>
@@ -272,6 +415,7 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                     <td className="py-4 px-6">
                       <div className="font-bold text-text-primary">{aff.name}</div>
                       <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
+                      <div className="text-[10px] font-mono text-text-secondary mt-1">Code: {aff.code}</div>
                     </td>
                     <td className="py-4 px-6">
                       <span className="text-sm bg-blue-500/10 text-blue-500 px-2 py-1 rounded border border-blue-500/20">
@@ -296,17 +440,6 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                     </td>
                     <td className="text-right py-4 px-6">
                       <div className="flex justify-end items-center gap-2">
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(aff.referralLink);
-                            alert('Link copied!');
-                          }}
-                          className="p-1.5 rounded-lg text-text-secondary hover:text-primary border border-transparent hover:bg-surface-hover transition-colors"
-                          title="Copy Link"
-                        >
-                          <LinkIcon className="w-4 h-4" />
-                        </button>
-
                         <Button
                           size="sm"
                           variant="outline"
@@ -317,9 +450,17 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                         >
                           Mark Paid
                         </Button>
+
+                        <button 
+                          onClick={() => handleCopyLink(aff.referralLink, aff.id)}
+                          className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors relative"
+                          title="Copy Link"
+                        >
+                          {copiedId === aff.id ? <Check className="w-4 h-4" /> : <LinkIcon className="w-4 h-4" />}
+                        </button>
                         
                         <button 
-                          onClick={() => alert('Edit functionality coming soon')}
+                          onClick={() => handleEditClick(aff)}
                           className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors"
                           title="Edit Affiliate"
                         >
