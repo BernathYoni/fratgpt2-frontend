@@ -51,6 +51,35 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
     }
   };
 
+  // Helper function to get model name based on provider and mode
+  const getModelName = (provider: string, mode: string) => {
+    if (provider === 'GEMINI') {
+      if (mode === 'FAST') return 'Gemini 2.0 Flash';
+      if (mode === 'EXPERT') return 'Gemini 3.0 Pro';
+      return 'Gemini 2.5 Pro';
+    }
+    if (provider === 'OPENAI') {
+      if (mode === 'EXPERT') return 'GPT-5.1';
+      return 'GPT-5 mini';
+    }
+    if (provider === 'CLAUDE') {
+      if (mode === 'EXPERT') return 'Claude Opus 4.5';
+      return 'Claude Sonnet 4.5';
+    }
+    return provider;
+  };
+
+  // Helper function to determine solve method
+  const getSolveMethod = (log: any) => {
+    if (log.input.images.length > 0) {
+      const source = log.input.images[0].source;
+      if (source === 'SNIP') return 'Snip';
+      if (source === 'SCREEN') return 'Screen';
+      return 'Image';
+    }
+    return 'Highlight';
+  };
+
   return (
     <div className="space-y-4">
       {/* Log Cards */}
@@ -62,29 +91,36 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
           >
             {/* Clickable wrapper */}
             <div
-              className="space-y-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200 -m-6 p-6"
+              className="space-y-4 cursor-pointer -m-6 p-6"
               onClick={() => toggleLogExpand(log.id)}
             >
-              {/* Header Row - Time, User, Mode */}
+              {/* Header Row - Action Type, Time, User, Expand Icon */}
               <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <Clock className="w-4 h-4 text-text-secondary flex-shrink-0" />
-                  <span className="text-sm text-text-secondary whitespace-nowrap">
-                    {formatDateTime(log.createdAt)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <User className="w-4 h-4 text-text-secondary flex-shrink-0" />
-                  <span className="text-sm text-text-primary font-medium truncate">
-                    {log.user.email}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 flex-shrink-0">
+                {/* Prominent Action Type */}
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl font-bold text-orange-500">Solve</span>
                   <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getModeBadgeStyles(log.mode)}`}>
                     {log.mode}
                   </span>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                    {getSolveMethod(log)}
+                  </span>
+                </div>
+
+                {/* Right side - Time, User, Expand */}
+                <div className="flex items-center gap-4 flex-shrink-0">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm text-text-secondary whitespace-nowrap">
+                      {formatDateTime(log.createdAt)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm text-text-primary font-medium">
+                      {log.user.email}
+                    </span>
+                  </div>
                   {expandedLogId === log.id ? (
                     <ChevronUp className="w-5 h-5 text-text-secondary" />
                   ) : (
@@ -101,34 +137,34 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                 </p>
               </div>
 
-              {/* Bottom Row - Providers and Cost */}
+              {/* Cost Breakdown Row */}
               <div className="flex items-center justify-between gap-4 pt-3 border-t border-border">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-text-secondary font-medium">Providers:</span>
-                  <div className="flex -space-x-2">
-                    {log.outputs.map((out: any, i: number) => (
-                      <div
-                        key={i}
-                        className={`w-7 h-7 rounded-full flex items-center justify-center border-2 border-white text-[11px] font-bold text-white ${getProviderBadgeStyles(out.provider)} shadow-sm`}
-                        title={out.provider}
-                      >
-                        {out.provider[0]}
-                      </div>
-                    ))}
-                  </div>
-                  {log.input.images.length > 0 && (
-                    <div className="flex items-center gap-1 ml-2">
-                      <ImageIcon className="w-4 h-4 text-text-secondary" />
-                      <span className="text-xs text-text-secondary">{log.input.images.length}</span>
-                    </div>
-                  )}
-                </div>
-
+                {/* Total Cost */}
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-text-secondary" />
-                  <span className="text-sm font-bold text-text-primary">
+                  <span className="text-xs text-text-secondary font-medium">Total Cost:</span>
+                  <span className="text-lg font-bold text-text-primary">
                     {formatCurrency(log.totalCost)}
                   </span>
+                </div>
+
+                {/* Model Costs */}
+                <div className="flex items-center gap-4 flex-wrap">
+                  {log.outputs.map((out: any, i: number) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-text-secondary">
+                        {getModelName(out.provider, log.mode)}:
+                      </span>
+                      <span className="text-sm font-semibold text-text-primary">
+                        {formatCurrency(out.cost)}
+                      </span>
+                      {out.metadata?.tokenUsage && (
+                        <span className="text-xs text-text-secondary">
+                          ({out.metadata.tokenUsage.inputTokens}in / {out.metadata.tokenUsage.outputTokens}out
+                          {out.metadata.tokenUsage.thinkingTokens > 0 && ` / ${out.metadata.tokenUsage.thinkingTokens}think`})
+                        </span>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
