@@ -95,16 +95,11 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
               onClick={() => toggleLogExpand(log.id)}
             >
               {/* Top Section - Action Type & Metadata */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 {/* Left: Action Type with badges */}
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-                      <MessageSquare className="w-6 h-6 text-white" />
-                    </div>
-                    <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-                      Solve
-                    </span>
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                    <MessageSquare className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${getModeBadgeStyles(log.mode)}`}>
@@ -116,8 +111,28 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                   </div>
                 </div>
 
-                {/* Right: Expand Icon */}
-                <div className="flex items-center gap-3">
+                {/* Right: User, Time, Total Cost, Expand Icon */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                      <User className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <span className="font-medium text-gray-700 text-sm">
+                      {log.user.email}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-sm">
+                      {formatDateTime(log.createdAt)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-green-600" />
+                    <span className="text-lg font-bold text-green-600">
+                      {formatCurrency(log.totalCost)}
+                    </span>
+                  </div>
                   {expandedLogId === log.id ? (
                     <ChevronUp className="w-6 h-6 text-orange-500" />
                   ) : (
@@ -125,205 +140,61 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                   )}
                 </div>
               </div>
-
-              {/* User & Time Row */}
-              <div className="flex items-center gap-6 mb-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <User className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <span className="font-medium text-gray-700">
-                    {log.user.email}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-500">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm">
-                    {formatDateTime(log.createdAt)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Input Preview */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 mb-4 border border-gray-200">
-                <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
-                  {log.input.text}
-                </p>
-              </div>
-
-              {/* Cost Breakdown Section */}
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-semibold text-gray-600">Total Cost</span>
-                  </div>
-                  <span className="text-2xl font-bold text-green-600">
-                    {formatCurrency(log.totalCost)}
-                  </span>
-                </div>
-
-                {/* Model-by-Model Breakdown */}
-                <div className="space-y-2">
-                  {log.outputs.map((out: any, i: number) => (
-                    <div key={i} className="bg-white/70 backdrop-blur rounded-lg p-3 border border-green-100">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-bold text-gray-800">
-                          {getModelName(out.provider, log.mode)}
-                        </span>
-                        <span className="text-lg font-bold text-green-700">
-                          {formatCurrency(out.cost)}
-                        </span>
-                      </div>
-                      {out.metadata?.tokenUsage && (
-                        <div className="flex items-center gap-3 text-xs text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <span className="font-semibold text-blue-600">{out.metadata.tokenUsage.inputTokens}</span>
-                            <span>input</span>
-                          </div>
-                          <div className="w-1 h-1 rounded-full bg-gray-400"></div>
-                          <div className="flex items-center gap-1">
-                            <span className="font-semibold text-purple-600">{out.metadata.tokenUsage.outputTokens}</span>
-                            <span>output</span>
-                          </div>
-                          {out.metadata.tokenUsage.thinkingTokens > 0 && (
-                            <>
-                              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
-                              <div className="flex items-center gap-1">
-                                <span className="font-semibold text-orange-600">{out.metadata.tokenUsage.thinkingTokens}</span>
-                                <span>thinking</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
 
-            {/* Expanded Details */}
+            {/* Expanded Details - Input & Cost Breakdown */}
             {expandedLogId === log.id && (
-              <div className="mt-6 pt-6 border-t border-border">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Input Section */}
-                  <div>
-                    <h4 className="text-xs font-bold text-text-secondary mb-3 uppercase tracking-wider flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4" />
-                      Input & Context
-                    </h4>
-                    <div className="bg-surface-hover/30 p-4 rounded-lg border border-border space-y-3">
-                      {/* Metadata Grid */}
-                      <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border">
-                        <div>
-                          <span className="text-xs text-text-secondary block mb-1">IP Address</span>
-                          <span className="font-mono text-xs text-text-primary">{log.ipAddress || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-xs text-text-secondary block mb-1">Interactions</span>
-                          <span className="font-mono text-xs text-text-primary">{log.interactions?.length || 0} events</span>
-                        </div>
-                      </div>
+              <div className="px-6 pb-6 space-y-4">
+                {/* Input Preview */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {log.input.text}
+                  </p>
+                </div>
 
-                      {/* Source URL */}
-                      {log.sourceUrl && (
-                        <div className="pb-3 border-b border-border">
-                          <span className="text-xs text-text-secondary block mb-1">Source URL</span>
-                          <a
-                            href={log.sourceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-blue-500 hover:underline truncate block"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {log.sourceUrl}
-                          </a>
-                        </div>
-                      )}
-
-                      {/* Full Input Text */}
-                      <div>
-                        <p className="text-sm text-text-primary whitespace-pre-wrap">{log.input.text}</p>
-                      </div>
-
-                      {/* Image Attachments */}
-                      {log.input.images.length > 0 && (
-                        <div className="space-y-2 pt-3 border-t border-border">
-                          {log.input.images.map((img: any) => (
-                            <div key={img.id} className="flex items-center gap-2 text-xs">
-                              <Shield className="w-3 h-3 text-text-secondary flex-shrink-0" />
-                              <span className="text-text-secondary">
-                                Image: <span className="font-medium">{img.source}</span> ({img.hasImage ? 'Stored' : 'Deleted'})
-                              </span>
-                              {img.regionData && (
-                                <span className="text-green-500 text-xs px-1.5 py-0.5 bg-green-500/10 rounded">
-                                  Has Region Data
-                                </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                {/* Cost Breakdown Section */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    <span className="text-sm font-semibold text-gray-600">Model Breakdown</span>
                   </div>
 
-                  {/* Output Section */}
-                  <div>
-                    <h4 className="text-xs font-bold text-text-secondary mb-3 uppercase tracking-wider flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      Outputs & Costs
-                    </h4>
-                    <div className="space-y-3">
-                      {log.outputs.map((out: any, idx: number) => (
-                        <div key={idx} className="bg-surface-hover/30 p-4 rounded-lg border border-border space-y-3">
-                          {/* Provider Header */}
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${getProviderBadgeStyles(out.provider)}`}>
-                                {out.provider[0]}
-                              </div>
-                              <span className="text-sm font-bold text-text-primary">
-                                {out.provider}
-                              </span>
-                            </div>
-                            <span className="text-sm font-mono font-bold text-text-primary">
-                              {formatCurrency(out.cost)}
-                            </span>
-                          </div>
-
-                          {/* Answer Preview */}
-                          <div className="bg-white/50 p-3 rounded border border-border">
-                            <p className="text-sm text-text-primary line-clamp-3">
-                              {out.shortAnswer}
-                            </p>
-                          </div>
-
-                          {/* Metadata */}
-                          <div className="text-xs font-mono bg-black/5 p-2.5 rounded space-y-1">
-                            <div className="flex justify-between">
-                              <span className="text-text-secondary">Confidence:</span>
-                              <span className="text-text-primary font-semibold">
-                                {out.confidence?.toFixed(2) ?? 'N/A'}
-                              </span>
-                            </div>
-                            {out.metadata?.tokenUsage && (
-                              <div className="flex justify-between">
-                                <span className="text-text-secondary">Tokens:</span>
-                                <span className="text-text-primary">
-                                  {out.metadata.tokenUsage.inputTokens} in / {out.metadata.tokenUsage.outputTokens} out
-                                </span>
-                              </div>
-                            )}
-                            {out.structuredAnswer && (
-                              <div className="pt-1 border-t border-border">
-                                <span className="text-green-600 font-semibold">Has Structured Answer</span>
-                              </div>
-                            )}
-                          </div>
+                  {/* Model-by-Model Breakdown */}
+                  <div className="space-y-2">
+                    {log.outputs.map((out: any, i: number) => (
+                      <div key={i} className="bg-white/70 backdrop-blur rounded-lg p-3 border border-green-100">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-bold text-gray-800">
+                            {getModelName(out.provider, log.mode)}
+                          </span>
+                          <span className="text-lg font-bold text-green-700">
+                            {formatCurrency(out.cost)}
+                          </span>
                         </div>
-                      ))}
-                    </div>
+                        {out.metadata?.tokenUsage && (
+                          <div className="flex items-center gap-3 text-xs text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <span className="font-semibold text-blue-600">{out.metadata.tokenUsage.inputTokens}</span>
+                              <span>input</span>
+                            </div>
+                            <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-semibold text-purple-600">{out.metadata.tokenUsage.outputTokens}</span>
+                              <span>output</span>
+                            </div>
+                            {out.metadata.tokenUsage.thinkingTokens > 0 && (
+                              <>
+                                <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold text-orange-600">{out.metadata.tokenUsage.thinkingTokens}</span>
+                                  <span>thinking</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
