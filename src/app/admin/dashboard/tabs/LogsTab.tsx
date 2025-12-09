@@ -142,16 +142,9 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
               </div>
             </div>
 
-            {/* Expanded Details - Input & Cost Breakdown */}
+            {/* Expanded Details - Cost Breakdown Only */}
             {expandedLogId === log.id && (
-              <div className="px-6 pb-6 space-y-4">
-                {/* Input Preview */}
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {log.input.text}
-                  </p>
-                </div>
-
+              <div className="px-6 pb-6">
                 {/* Cost Breakdown Section */}
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
                   <div className="flex items-center gap-2 mb-3">
