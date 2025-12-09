@@ -188,13 +188,14 @@ export class ApiClient {
     });
   }
 
-  async createAffiliate(token: string, data: { 
-    name: string; 
-    code?: string; 
-    payoutRate?: number; 
+  async createAffiliate(token: string, data: {
+    name: string;
+    code?: string;
+    payoutRate?: number;
     paymentManager?: string;
     phoneNumber?: string;
     venmoHandle?: string;
+    collegeId?: string;
   }) {
     return this.request<{
       id: string;
@@ -208,12 +209,13 @@ export class ApiClient {
     });
   }
 
-  async updateAffiliate(token: string, id: string, data: { 
-    name?: string; 
-    payoutRate?: number; 
+  async updateAffiliate(token: string, id: string, data: {
+    name?: string;
+    payoutRate?: number;
     paymentManager?: string;
     phoneNumber?: string;
     venmoHandle?: string;
+    collegeId?: string;
   }) {
     return this.request<{
       id: string;
@@ -258,6 +260,17 @@ export class ApiClient {
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({}),
     });
+  }
+
+  // College endpoints
+  async searchColleges(query?: string) {
+    const endpoint = query ? `/colleges/search?q=${encodeURIComponent(query)}` : '/colleges/search';
+    return this.request<Array<{
+      id: string;
+      name: string;
+      state: string;
+      city?: string;
+    }>>(endpoint);
   }
 
   // Usage endpoints

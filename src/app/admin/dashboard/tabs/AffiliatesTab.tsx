@@ -21,6 +21,10 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
   const [newPaymentManager, setNewPaymentManager] = useState('Yoni');
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [newVenmoHandle, setNewVenmoHandle] = useState('');
+  const [newCollegeId, setNewCollegeId] = useState('');
+  const [newCollegeSearch, setNewCollegeSearch] = useState('');
+  const [collegeSearchResults, setCollegeSearchResults] = useState<any[]>([]);
+  const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
   const [createAffiliateLoading, setCreateAffiliateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
 
@@ -31,11 +35,67 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
   const [editPaymentManager, setEditPaymentManager] = useState('');
   const [editPhoneNumber, setEditPhoneNumber] = useState('');
   const [editVenmoHandle, setEditVenmoHandle] = useState('');
+  const [editCollegeId, setEditCollegeId] = useState('');
+  const [editCollegeSearch, setEditCollegeSearch] = useState('');
+  const [editCollegeSearchResults, setEditCollegeSearchResults] = useState<any[]>([]);
+  const [showEditCollegeDropdown, setShowEditCollegeDropdown] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
 
   const [showArchivedAffiliates, setShowArchivedAffiliates] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // College search handler for create form
+  const handleCollegeSearch = async (query: string) => {
+    setNewCollegeSearch(query);
+    if (query.length < 2) {
+      setCollegeSearchResults([]);
+      setShowCollegeDropdown(false);
+      return;
+    }
+
+    try {
+      const res = await api.searchColleges(query);
+      if (res.success && res.data) {
+        setCollegeSearchResults(res.data);
+        setShowCollegeDropdown(true);
+      }
+    } catch (err) {
+      console.error('Error searching colleges:', err);
+    }
+  };
+
+  const handleCollegeSelect = (college: any) => {
+    setNewCollegeId(college.id);
+    setNewCollegeSearch(`${college.name} (${college.state})`);
+    setShowCollegeDropdown(false);
+  };
+
+  // College search handler for edit form
+  const handleEditCollegeSearch = async (query: string) => {
+    setEditCollegeSearch(query);
+    if (query.length < 2) {
+      setEditCollegeSearchResults([]);
+      setShowEditCollegeDropdown(false);
+      return;
+    }
+
+    try {
+      const res = await api.searchColleges(query);
+      if (res.success && res.data) {
+        setEditCollegeSearchResults(res.data);
+        setShowEditCollegeDropdown(true);
+      }
+    } catch (err) {
+      console.error('Error searching colleges:', err);
+    }
+  };
+
+  const handleEditCollegeSelect = (college: any) => {
+    setEditCollegeId(college.id);
+    setEditCollegeSearch(`${college.name} (${college.state})`);
+    setShowEditCollegeDropdown(false);
+  };
 
   const handleCreateAffiliate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,12 +106,13 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
 
     try {
       const res = await api.createAffiliate(token, {
-        name: capitalizeWords(newAffiliateName), 
-        code: newAffiliateCode || undefined, 
+        name: capitalizeWords(newAffiliateName),
+        code: newAffiliateCode || undefined,
         payoutRate: parseFloat(newAffiliatePayoutRate),
         paymentManager: newPaymentManager,
         phoneNumber: newPhoneNumber || undefined,
         venmoHandle: newVenmoHandle || undefined,
+        collegeId: newCollegeId || undefined,
       });
       if (res.success) {
         setShowAffiliateForm(false);
@@ -60,6 +121,8 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
         setNewAffiliatePayoutRate('5.00');
         setNewPhoneNumber('');
         setNewVenmoHandle('');
+        setNewCollegeId('');
+        setNewCollegeSearch('');
         onRefresh();
       } else {
         setCreateError(res.error || 'Failed to create affiliate');
@@ -79,6 +142,8 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
     setEditPaymentManager(aff.paymentManager || 'Yoni');
     setEditPhoneNumber(aff.phoneNumber || '');
     setEditVenmoHandle(aff.venmoHandle || '');
+    setEditCollegeId(aff.collegeId || '');
+    setEditCollegeSearch(aff.college ? `${aff.college.name} (${aff.college.state})` : '');
     setEditError('');
   };
 
@@ -97,6 +162,7 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
         paymentManager: editPaymentManager,
         phoneNumber: editPhoneNumber || undefined,
         venmoHandle: editVenmoHandle || undefined,
+        collegeId: editCollegeId || undefined,
       });
 
       if (res.success) {
@@ -250,18 +316,46 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
             </div>
             <div>
               <label className="text-sm font-medium text-text-secondary mb-1 block">
+                College (Optional)
+              </label>
+              <div className="relative">
+                <Input
+                  placeholder="Start typing college name..."
+                  value={newCollegeSearch}
+                  onChange={(e) => handleCollegeSearch(e.target.value)}
+                  onFocus={() => newCollegeSearch.length >= 2 && setShowCollegeDropdown(true)}
+                />
+                {showCollegeDropdown && collegeSearchResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-surface-paper border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {collegeSearchResults.map((college) => (
+                      <button
+                        key={college.id}
+                        type="button"
+                        onClick={() => handleCollegeSelect(college)}
+                        className="w-full px-4 py-2 text-left hover:bg-surface-hover text-text-primary transition-colors"
+                      >
+                        <div className="font-medium">{college.name}</div>
+                        <div className="text-xs text-text-secondary">{college.city ? `${college.city}, ` : ''}{college.state}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-text-secondary mb-1 block">
                 Custom Code (Optional)
                 <span className="ml-2 text-xs text-text-secondary opacity-70">Leave blank to auto-generate</span>
               </label>
-              <Input 
-                placeholder="e.g. MIKEFREE" 
+              <Input
+                placeholder="e.g. MIKEFREE"
                 value={newAffiliateCode}
                 onChange={(e) => setNewAffiliateCode(e.target.value.toUpperCase())}
                 pattern="[A-Z0-9_-]+"
                 title="Uppercase letters, numbers, underscores, and dashes only"
               />
             </div>
-            
+
             {createError && (
               <div className="text-sm text-red-500 bg-red-500/10 p-2 rounded">
                 {createError}
@@ -344,14 +438,42 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
             </div>
             <div>
               <label className="text-sm font-medium text-text-secondary mb-1 block">Payout Rate ($)</label>
-              <Input 
+              <Input
                 type="number"
                 step="0.01"
-                placeholder="5.00" 
+                placeholder="5.00"
                 value={editPayoutRate}
                 onChange={(e) => setEditPayoutRate(e.target.value)}
                 required
               />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-text-secondary mb-1 block">
+                College (Optional)
+              </label>
+              <div className="relative">
+                <Input
+                  placeholder="Start typing college name..."
+                  value={editCollegeSearch}
+                  onChange={(e) => handleEditCollegeSearch(e.target.value)}
+                  onFocus={() => editCollegeSearch.length >= 2 && setShowEditCollegeDropdown(true)}
+                />
+                {showEditCollegeDropdown && editCollegeSearchResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-surface-paper border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {editCollegeSearchResults.map((college) => (
+                      <button
+                        key={college.id}
+                        type="button"
+                        onClick={() => handleEditCollegeSelect(college)}
+                        className="w-full px-4 py-2 text-left hover:bg-surface-hover text-text-primary transition-colors"
+                      >
+                        <div className="font-medium">{college.name}</div>
+                        <div className="text-xs text-text-secondary">{college.city ? `${college.city}, ` : ''}{college.state}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium text-text-secondary mb-1 block">
@@ -361,7 +483,7 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                 {editingAffiliate.code}
               </div>
             </div>
-            
+
             {editError && (
               <div className="text-sm text-red-500 bg-red-500/10 p-2 rounded">
                 {editError}
