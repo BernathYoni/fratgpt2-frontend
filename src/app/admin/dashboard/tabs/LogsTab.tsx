@@ -94,19 +94,24 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
               className="cursor-pointer -m-6 p-6"
               onClick={() => toggleLogExpand(log.id)}
             >
-              {/* Top Section - Input text on left, metadata on right */}
+              {/* Top Section - Prominent action header on left, metadata on right */}
               <div className="flex items-center justify-between gap-4">
-                {/* Left: Chat icon + Input text preview */}
+                {/* Left: Chat icon + Prominent "Solve" header + Input text preview */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg flex-shrink-0">
-                    <MessageSquare className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg flex-shrink-0">
+                    <MessageSquare className="w-7 h-7 text-white" />
                   </div>
-                  <p className="text-sm text-gray-700 line-clamp-1 flex-1">
-                    {log.input.text}
-                  </p>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                      Solve
+                    </h3>
+                    <p className="text-sm text-gray-600 line-clamp-1">
+                      {log.input.text}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Right: Action type, User, Time, Total Cost, Expand Icon */}
+                {/* Right: Mode, Method, User, Time, Total Cost, Expand Icon */}
                 <div className="flex items-center gap-4 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${getModeBadgeStyles(log.mode)}`}>
