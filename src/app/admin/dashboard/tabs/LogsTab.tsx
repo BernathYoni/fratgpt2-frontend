@@ -58,11 +58,13 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
         {data.logs.map((log: any) => (
           <Card
             key={log.id}
-            className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200"
-            onClick={() => toggleLogExpand(log.id)}
+            className="overflow-hidden"
           >
-            {/* Main Card Content */}
-            <div className="space-y-4">
+            {/* Clickable wrapper */}
+            <div
+              className="space-y-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200 -m-6 p-6"
+              onClick={() => toggleLogExpand(log.id)}
+            >
               {/* Header Row - Time, User, Mode */}
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -256,6 +258,7 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                 </div>
               </div>
             )}
+            </div>
           </Card>
         ))}
       </div>
