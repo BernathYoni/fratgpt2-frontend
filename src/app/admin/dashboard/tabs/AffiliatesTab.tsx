@@ -256,6 +256,24 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                 </select>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-text-secondary mb-1 block">Phone Number (Optional)</label>
+                <Input 
+                  placeholder="e.g. 555-123-4567" 
+                  value={newPhoneNumber}
+                  onChange={(e) => setNewPhoneNumber(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-text-secondary mb-1 block">Venmo Handle (Optional)</label>
+                <Input 
+                  placeholder="e.g. @mike-smith" 
+                  value={newVenmoHandle}
+                  onChange={(e) => setNewVenmoHandle(e.target.value)}
+                />
+              </div>
+            </div>
             <div>
               <label className="text-sm font-medium text-text-secondary mb-1 block">Payout Rate ($)</label>
               <Input 
@@ -343,6 +361,24 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                 </select>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-text-secondary mb-1 block">Phone Number (Optional)</label>
+                <Input 
+                  placeholder="e.g. 555-123-4567" 
+                  value={editPhoneNumber}
+                  onChange={(e) => setEditPhoneNumber(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-text-secondary mb-1 block">Venmo Handle (Optional)</label>
+                <Input 
+                  placeholder="e.g. @mike-smith" 
+                  value={editVenmoHandle}
+                  onChange={(e) => setEditVenmoHandle(e.target.value)}
+                />
+              </div>
+            </div>
             <div>
               <label className="text-sm font-medium text-text-secondary mb-1 block">Payout Rate ($)</label>
               <Input 
@@ -427,6 +463,12 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                       <div className="font-bold text-text-primary">{aff.name}</div>
                       <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
                       <div className="text-[10px] font-mono text-text-secondary mt-1">Code: {aff.code}</div>
+                      {(aff.phoneNumber || aff.venmoHandle) && (
+                        <div className="mt-1 space-y-0.5">
+                          {aff.phoneNumber && <div className="text-[10px] text-text-secondary">📞 {aff.phoneNumber}</div>}
+                          {aff.venmoHandle && <div className="text-[10px] text-text-secondary">💸 {aff.venmoHandle}</div>}
+                        </div>
+                      )}
                     </td>
                     <td className="py-4 px-6">
                       <span className="text-sm bg-blue-500/10 text-blue-500 px-2 py-1 rounded border border-blue-500/20">
@@ -451,6 +493,14 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                     </td>
                     <td className="text-right py-4 px-6">
                       <div className="flex justify-end items-center gap-2">
+                        <button 
+                          onClick={() => handleCopyLink(aff.referralLink, aff.id)}
+                          className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors relative"
+                          title="Copy Link"
+                        >
+                          {copiedId === aff.id ? <Check className="w-4 h-4" /> : <LinkIcon className="w-4 h-4" />}
+                        </button>
+
                         <Button
                           size="sm"
                           variant="outline"
@@ -461,14 +511,6 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                         >
                           Mark Paid
                         </Button>
-
-                        <button 
-                          onClick={() => handleCopyLink(aff.referralLink, aff.id)}
-                          className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/20 transition-colors relative"
-                          title="Copy Link"
-                        >
-                          {copiedId === aff.id ? <Check className="w-4 h-4" /> : <LinkIcon className="w-4 h-4" />}
-                        </button>
                         
                         <button 
                           onClick={() => handleEditClick(aff)}
