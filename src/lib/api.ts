@@ -237,10 +237,16 @@ export class ApiClient {
   }
 
   async deleteAffiliate(token: string, id: string) {
-    return this.request<void>(`/admin/affiliates/${id}`, {
+    const res = await this.request<void>(`/admin/affiliates/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
+    
+    // Handle 204 No Content (empty body) causing JSON parse error
+    if (!res.success && res.error && res.error.includes('Unexpected end of JSON input')) {
+        return { success: true };
+    }
+    return res;
   }
 
   async markAffiliatePaid(token: string, affiliateId: string) {
