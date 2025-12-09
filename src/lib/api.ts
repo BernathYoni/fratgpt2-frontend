@@ -175,6 +175,8 @@ export class ApiClient {
       conversions: number;
       payoutRate: number;
       amountPaid: number;
+      paymentManager?: string;
+      archived: boolean;
       referredUsersCount: number;
       unpaidBalance: number;
       unpaidSignups: number;
@@ -184,7 +186,7 @@ export class ApiClient {
     });
   }
 
-  async createAffiliate(token: string, name: string, code?: string, payoutRate?: number) {
+  async createAffiliate(token: string, name: string, code?: string, payoutRate?: number, paymentManager?: string) {
     return this.request<{
       id: string;
       name: string;
@@ -193,7 +195,36 @@ export class ApiClient {
     }>('/admin/affiliates', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ name, code, payoutRate }),
+      body: JSON.stringify({ name, code, payoutRate, paymentManager }),
+    });
+  }
+
+  async updateAffiliate(token: string, id: string, data: { name?: string; payoutRate?: number; paymentManager?: string }) {
+    return this.request<{
+      id: string;
+      name: string;
+    }>(`/admin/affiliates/${id}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    });
+  }
+
+  async archiveAffiliate(token: string, id: string) {
+    return this.request<{
+      id: string;
+      archived: boolean;
+    }>(`/admin/affiliates/${id}/archive`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({}),
+    });
+  }
+
+  async deleteAffiliate(token: string, id: string) {
+    return this.request<void>(`/admin/affiliates/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
     });
   }
 

@@ -31,6 +31,7 @@ export default function AdminDashboard() {
   const [newAffiliateName, setNewAffiliateName] = useState('');
   const [newAffiliateCode, setNewAffiliateCode] = useState('');
   const [newAffiliatePayoutRate, setNewAffiliatePayoutRate] = useState('5.00');
+  const [newPaymentManager, setNewPaymentManager] = useState('Yoni'); // Default
   const [createAffiliateLoading, setCreateAffiliateLoading] = useState(false);
   const [showArchivedAffiliates, setShowArchivedAffiliates] = useState(false);
   
@@ -128,12 +129,19 @@ export default function AdminDashboard() {
     if (!token) return;
 
     try {
-      const res = await api.createAffiliate(token, newAffiliateName, newAffiliateCode || undefined);
+      const res = await api.createAffiliate(
+        token, 
+        newAffiliateName, 
+        newAffiliateCode || undefined, 
+        parseFloat(newAffiliatePayoutRate),
+        newPaymentManager
+      );
       if (res.success) {
         alert('Affiliate created successfully!');
         setShowAffiliateForm(false);
         setNewAffiliateName('');
         setNewAffiliateCode('');
+        setNewAffiliatePayoutRate('5.00');
         fetchData(); // Refresh list
       } else {
         alert('Failed to create affiliate: ' + res.error);
@@ -146,8 +154,30 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleArchive = async (id: string, currentStatus: boolean) => {
+    if (!confirm(currentStatus ? 'Unarchive this affiliate?' : 'Archive this affiliate? They will be hidden from the main list.')) return;
+    const token = getToken();
+    if (!token) return;
+    try {
+      const res = await api.archiveAffiliate(token, id);
+      if (res.success) fetchData();
+      else alert('Failed to archive: ' + res.error);
+    } catch (err) { alert('Error archiving affiliate'); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to DELETE this affiliate? This cannot be undone.')) return;
+    const token = getToken();
+    if (!token) return;
+    try {
+      const res = await api.deleteAffiliate(token, id);
+      if (res.success) fetchData();
+      else alert('Failed to delete: ' + res.error);
+    } catch (err) { alert('Error deleting affiliate'); }
+  };
+
   const handleMarkPaid = async (affiliateId: string, amount: number) => {
-    if (!confirm(`Confirm payout of $${amount.toFixed(2)}? This will reset their unpaid balance to $0.`)) return;
+    if (!confirm(`Confirm payout of $${amount.toFixed(2)}? This will reset their unpaid balance to $0.`)) return; 
     
     const token = getToken();
     if (!token) return;
@@ -573,7 +603,7 @@ export default function AdminDashboard() {
                             {formatDate(user.createdAt)}
                           </td>
                           <td className="text-right py-4 px-6">
-                            <span className={`text-xs font-bold px-2 py-1 rounded ${
+                            <span className={`text-xs font-bold px-2 py-1 rounded ${ 
                               user.usageThisMonthPercent >= 90 ? 'bg-red-500/10 text-red-500' :
                               user.usageThisMonthPercent >= 50 ? 'bg-yellow-500/10 text-yellow-500' :
                               'bg-green-500/10 text-green-500'
@@ -701,14 +731,27 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                   <form onSubmit={handleCreateAffiliate} className="flex flex-col gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-text-secondary mb-1 block">Partner Name</label>
-                      <Input 
-                        placeholder="e.g. Mike Smith" 
-                        value={newAffiliateName}
-                        onChange={(e) => setNewAffiliateName(e.target.value)}
-                        required
-                      />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-text-secondary mb-1 block">Partner Name</label>
+                        <Input 
+                          placeholder="e.g. Mike Smith" 
+                          value={newAffiliateName}
+                          onChange={(e) => setNewAffiliateName(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-text-secondary mb-1 block">Payment Manager</label>
+                        <select 
+                          className="w-full p-2 rounded-lg bg-background border border-input border-border focus:border-primary outline-none text-text-primary"
+                          value={newPaymentManager}
+                          onChange={(e) => setNewPaymentManager(e.target.value)}
+                        >
+                          <option value="Yoni">Yoni Bernath</option>
+                          <option value="Ethan">Ethan Levine</option>
+                        </select>
+                      </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-text-secondary mb-1 block">Payout Rate ($)</label>
@@ -762,6 +805,7 @@ export default function AdminDashboard() {
                     <thead>
                       <tr className="bg-surface-paper border-b border-border">
                         <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Partner</th>
+                        <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Manager</th>
                         <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Code</th>
                         <th className="text-left py-4 px-6 text-sm font-medium text-text-secondary">Referral Link</th>
                         <th className="text-right py-4 px-6 text-sm font-medium text-text-secondary">Signups</th>
@@ -780,7 +824,7 @@ export default function AdminDashboard() {
                         if (filteredAffiliates.length === 0) {
                           return (
                             <tr>
-                              <td colSpan={8} className="py-8 text-center text-text-secondary">
+                              <td colSpan={9} className="py-8 text-center text-text-secondary">
                                 {showArchivedAffiliates ? 'No archived affiliates found.' : 'No active affiliates found. Create one to get started.'}
                               </td>
                             </tr>
@@ -792,6 +836,11 @@ export default function AdminDashboard() {
                             <td className="py-4 px-6">
                               <div className="font-bold text-text-primary">{aff.name}</div>
                               <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className="text-sm bg-blue-500/10 text-blue-500 px-2 py-1 rounded border border-blue-500/20">
+                                {aff.paymentManager || 'Unassigned'}
+                              </span>
                             </td>
                             <td className="py-4 px-6">
                               <span className="font-mono text-xs bg-surface-paper px-2 py-1 rounded border border-border text-green-500 font-bold">
@@ -853,8 +902,8 @@ export default function AdminDashboard() {
                                 </button>
 
                                 <button 
-                                  onClick={() => alert(showArchivedAffiliates ? 'Unarchive functionality coming soon' : 'Archive functionality coming soon')}
-                                  className={`p-1.5 rounded-lg border border-transparent transition-colors ${
+                                  onClick={() => handleArchive(aff.id, aff.archived)}
+                                  className={`p-1.5 rounded-lg border border-transparent transition-colors ${ 
                                     showArchivedAffiliates 
                                       ? 'text-green-500 hover:bg-green-500/10 hover:border-green-500/20' 
                                       : 'text-orange-500 hover:bg-orange-500/10 hover:border-orange-500/20'
@@ -865,7 +914,7 @@ export default function AdminDashboard() {
                                 </button>
 
                                 <button 
-                                  onClick={() => alert('Delete functionality coming soon')}
+                                  onClick={() => handleDelete(aff.id)}
                                   className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors"
                                   title="Delete Affiliate"
                                 >
@@ -1001,8 +1050,8 @@ export default function AdminDashboard() {
                                         <div key={idx} className="bg-surface p-4 rounded-lg border border-border">
                                           <div className="flex justify-between items-center mb-2">
                                             <span className={`text-xs font-bold px-2 py-0.5 rounded ${ 
-                                              out.provider === 'GEMINI' ? 'bg-blue-500/10 text-blue-500' :
-                                              out.provider === 'OPENAI' ? 'bg-green-500/10 text-green-500' :
+                                              out.provider === 'GEMINI' ? 'bg-blue-500/10 text-blue-500' : 
+                                              out.provider === 'OPENAI' ? 'bg-green-500/10 text-green-500' : 
                                               'bg-orange-500/10 text-orange-500'
                                             }`}>
                                               {out.provider}
