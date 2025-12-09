@@ -176,6 +176,8 @@ export class ApiClient {
       payoutRate: number;
       amountPaid: number;
       paymentManager?: string;
+      phoneNumber?: string;
+      venmoHandle?: string;
       archived: boolean;
       referredUsersCount: number;
       unpaidBalance: number;
@@ -186,7 +188,14 @@ export class ApiClient {
     });
   }
 
-  async createAffiliate(token: string, name: string, code?: string, payoutRate?: number, paymentManager?: string) {
+  async createAffiliate(token: string, data: { 
+    name: string; 
+    code?: string; 
+    payoutRate?: number; 
+    paymentManager?: string;
+    phoneNumber?: string;
+    venmoHandle?: string;
+  }) {
     return this.request<{
       id: string;
       name: string;
@@ -195,11 +204,17 @@ export class ApiClient {
     }>('/admin/affiliates', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ name, code, payoutRate, paymentManager }),
+      body: JSON.stringify(data),
     });
   }
 
-  async updateAffiliate(token: string, id: string, data: { name?: string; payoutRate?: number; paymentManager?: string }) {
+  async updateAffiliate(token: string, id: string, data: { 
+    name?: string; 
+    payoutRate?: number; 
+    paymentManager?: string;
+    phoneNumber?: string;
+    venmoHandle?: string;
+  }) {
     return this.request<{
       id: string;
       name: string;

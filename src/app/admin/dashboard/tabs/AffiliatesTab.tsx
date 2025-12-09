@@ -19,6 +19,8 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
   const [newAffiliateCode, setNewAffiliateCode] = useState('');
   const [newAffiliatePayoutRate, setNewAffiliatePayoutRate] = useState('5.00');
   const [newPaymentManager, setNewPaymentManager] = useState('Yoni');
+  const [newPhoneNumber, setNewPhoneNumber] = useState('');
+  const [newVenmoHandle, setNewVenmoHandle] = useState('');
   const [createAffiliateLoading, setCreateAffiliateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
 
@@ -27,6 +29,8 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
   const [editName, setEditName] = useState('');
   const [editPayoutRate, setEditPayoutRate] = useState('');
   const [editPaymentManager, setEditPaymentManager] = useState('');
+  const [editPhoneNumber, setEditPhoneNumber] = useState('');
+  const [editVenmoHandle, setEditVenmoHandle] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
 
@@ -41,18 +45,21 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
     if (!token) return;
 
     try {
-      const res = await api.createAffiliate(
-        token, 
-        newAffiliateName, 
-        newAffiliateCode || undefined, 
-        parseFloat(newAffiliatePayoutRate),
-        newPaymentManager
-      );
+      const res = await api.createAffiliate(token, {
+        name: newAffiliateName, 
+        code: newAffiliateCode || undefined, 
+        payoutRate: parseFloat(newAffiliatePayoutRate),
+        paymentManager: newPaymentManager,
+        phoneNumber: newPhoneNumber || undefined,
+        venmoHandle: newVenmoHandle || undefined,
+      });
       if (res.success) {
         setShowAffiliateForm(false);
         setNewAffiliateName('');
         setNewAffiliateCode('');
         setNewAffiliatePayoutRate('5.00');
+        setNewPhoneNumber('');
+        setNewVenmoHandle('');
         onRefresh();
       } else {
         setCreateError(res.error || 'Failed to create affiliate');
@@ -70,6 +77,8 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
     setEditName(aff.name);
     setEditPayoutRate(aff.payoutRate.toString());
     setEditPaymentManager(aff.paymentManager || 'Yoni');
+    setEditPhoneNumber(aff.phoneNumber || '');
+    setEditVenmoHandle(aff.venmoHandle || '');
     setEditError('');
   };
 
@@ -85,7 +94,9 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
       const res = await api.updateAffiliate(token, editingAffiliate.id, {
         name: editName,
         payoutRate: parseFloat(editPayoutRate),
-        paymentManager: editPaymentManager
+        paymentManager: editPaymentManager,
+        phoneNumber: editPhoneNumber || undefined,
+        venmoHandle: editVenmoHandle || undefined,
       });
 
       if (res.success) {
