@@ -258,7 +258,6 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                 </div>
               </div>
             )}
-            </div>
           </Card>
         ))}
       </div>
