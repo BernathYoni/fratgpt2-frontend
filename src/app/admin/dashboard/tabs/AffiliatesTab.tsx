@@ -461,10 +461,10 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                   <tr key={aff.id} className="hover:bg-surface-hover/50 transition-colors">
                     <td className="py-4 px-6">
                       <div className="font-bold text-text-primary">{aff.name}</div>
-                      <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
                       <div className="text-[10px] font-mono text-text-secondary mt-1">
                         Manager: {aff.paymentManager || 'Unassigned'}
                       </div>
+                      <div className="text-xs text-text-secondary">Created {formatDate(aff.createdAt)}</div>
                     </td>
                     <td className="py-4 px-6 text-sm text-text-secondary">
                       {aff.phoneNumber || '-'}
@@ -479,9 +479,11 @@ export default function AffiliatesTab({ data, onRefresh }: AffiliatesTabProps) {
                     </td>
                     <td className="text-right py-4 px-6">
                       <div className="flex flex-col items-end">
-                        <span className="font-bold text-text-primary">{aff.signups} Total</span>
-                        <span className={`text-xs ${aff.unpaidSignups > 0 ? 'text-orange-500 font-medium' : 'text-text-secondary'}`}>
+                        <span className={`font-bold ${aff.unpaidSignups > 0 ? 'text-orange-500' : 'text-text-secondary'}`}>
                           {aff.unpaidSignups} Unpaid
+                        </span>
+                        <span className="text-xs text-text-secondary">
+                          {aff.signups} Total
                         </span>
                       </div>
                     </td>
