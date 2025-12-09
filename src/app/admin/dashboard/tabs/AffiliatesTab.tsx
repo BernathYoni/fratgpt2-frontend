@@ -3,7 +3,7 @@ import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Users, Activity, DollarSign, Plus, X, Edit, Archive, RefreshCw, Trash2, Link as LinkIcon, Check } from 'lucide-react';
-import { formatCurrency, formatDate } from '../utils';
+import { formatCurrency, formatDate, capitalizeWords } from '../utils';
 import { api } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
