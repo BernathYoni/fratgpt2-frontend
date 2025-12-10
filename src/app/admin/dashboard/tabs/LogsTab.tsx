@@ -101,14 +101,9 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg flex-shrink-0">
                     <MessageSquare className="w-7 h-7 text-white" />
                   </div>
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-                      Solve
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-1">
-                      {log.input.text}
-                    </p>
-                  </div>
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                    Solve
+                  </h3>
                 </div>
 
                 {/* Right: Mode, Method, User, Time, Total Cost, Expand Icon */}
