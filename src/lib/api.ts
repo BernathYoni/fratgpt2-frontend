@@ -489,6 +489,22 @@ export class ApiClient {
       headers: { Authorization: `Bearer ${token}` },
     });
   }
+
+  async getMapActivity(token: string) {
+    return this.request<{
+      activity: Array<{
+        id: string;
+        lat: number;
+        lng: number;
+        location: string;
+        mode: string;
+        timestamp: string;
+        userEmail: string;
+      }>;
+    }>('/admin/map-activity', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
 }
 
 export const api = new ApiClient();

@@ -3,15 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { DollarSign, Users, FileText, Link as LinkIcon, Shield, Calendar, Trash2, BarChart2 } from 'lucide-react';
+import { DollarSign, Users, FileText, Link as LinkIcon, Shield, Calendar, Trash2, BarChart2, Map as MapIcon } from 'lucide-react';
 import CostTab from './tabs/CostTab';
 import UsersTab from './tabs/UsersTab';
 import AffiliatesTab from './tabs/AffiliatesTab';
 import LogsTab from './tabs/LogsTab';
 import MiscStatsTab from './tabs/MiscStatsTab';
+import MapTab from './tabs/MapTab';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
-type Tab = 'cost' | 'users' | 'logs' | 'affiliates' | 'misc';
+type Tab = 'cost' | 'users' | 'logs' | 'affiliates' | 'misc' | 'map';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('misc');
@@ -208,6 +209,18 @@ export default function AdminDashboard() {
           </button>
 
           <button
+            onClick={() => setActiveTab('map')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
+              activeTab === 'map'
+                ? 'bg-gradient-to-r from-indigo-500/10 to-violet-500/10 text-indigo-500 border border-indigo-500/20 shadow-sm'
+                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+            }`}
+          >
+            <MapIcon className="w-5 h-5" />
+            Live Map
+          </button>
+
+          <button
             onClick={() => setActiveTab('misc')}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
               activeTab === 'misc'
@@ -245,17 +258,20 @@ export default function AdminDashboard() {
                 {activeTab === 'users' && <Users className="w-5 h-5 text-purple-500" />}
                 {activeTab === 'logs' && <FileText className="w-5 h-5 text-blue-500" />}
                 {activeTab === 'misc' && <BarChart2 className="w-5 h-5 text-teal-500" />}
+                {activeTab === 'map' && <MapIcon className="w-5 h-5 text-indigo-500" />}
                 
                 {activeTab === 'cost' && 'Financial Overview'}
                 {activeTab === 'users' && 'User Management'}
                 {activeTab === 'logs' && 'System Logs'}
                 {activeTab === 'misc' && 'Miscellaneous Statistics'}
+                {activeTab === 'map' && 'Real-time Activity'}
               </h2>
               <p className="text-xs text-text-secondary mt-1">
                 {activeTab === 'cost' && 'Track API costs and token consumption'}
                 {activeTab === 'users' && 'View all users and their lifetime value'}
                 {activeTab === 'logs' && 'Detailed inspection of all system interactions'}
                 {activeTab === 'misc' && 'Snip vs Screen usage and cost analysis'}
+                {activeTab === 'map' && 'Live view of solves across the United States'}
               </p>
             </div>
 
@@ -331,6 +347,11 @@ export default function AdminDashboard() {
           {/* MISC STATS TAB CONTENT */}
           {activeTab === 'misc' && (
             <MiscStatsTab data={miscStatsData} />
+          )}
+
+          {/* MAP TAB CONTENT */}
+          {activeTab === 'map' && (
+            <MapTab />
           )}
         </div>
       </div>
