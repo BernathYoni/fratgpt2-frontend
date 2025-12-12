@@ -433,6 +433,7 @@ export class ApiClient {
         mode: string;
         sourceUrl?: string;
         ipAddress?: string;
+        location?: string; // New field
         interactions?: any[];
         input: { text: string; images: Array<{ id: string; source: string; hasImage: boolean }> };
         outputs: Array<{

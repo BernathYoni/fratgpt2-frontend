@@ -160,18 +160,6 @@ export default function AdminDashboard() {
         {/* Sidebar Nav */}
         <div className="flex flex-col gap-2">
           <button
-            onClick={() => setActiveTab('misc')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
-              activeTab === 'misc'
-                ? 'bg-gradient-to-r from-teal-500/10 to-emerald-500/10 text-teal-500 border border-teal-500/20 shadow-sm'
-                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-            }`}
-          >
-            <BarChart2 className="w-5 h-5" />
-            Misc Stats
-          </button>
-
-          <button
             onClick={() => setActiveTab('cost')}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
               activeTab === 'cost'
@@ -217,6 +205,18 @@ export default function AdminDashboard() {
           >
             <FileText className="w-5 h-5" />
             Logs
+          </button>
+
+          <button
+            onClick={() => setActiveTab('misc')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
+              activeTab === 'misc'
+                ? 'bg-gradient-to-r from-teal-500/10 to-emerald-500/10 text-teal-500 border border-teal-500/20 shadow-sm'
+                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+            }`}
+          >
+            <BarChart2 className="w-5 h-5" />
+            Misc Stats
           </button>
 
           <div className="h-px bg-border my-2" />

@@ -106,8 +106,16 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                   </h3>
                 </div>
 
-                {/* Right: Mode, Method, User, Time, Total Cost, Expand Icon */}
+                {/* Right: Location, Mode, Method, User, Time, Total Cost, Expand Icon */}
                 <div className="flex items-center gap-4 flex-shrink-0">
+                  {log.location && (
+                    <div className="flex flex-col items-end">
+                      <span className="font-bold text-text-primary text-sm">{log.location}</span>
+                      {log.ipAddress && (
+                        <span className="text-xs text-text-secondary font-mono">{log.ipAddress}</span>
+                      )}
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${getModeBadgeStyles(log.mode)}`}>
                       {log.mode}
@@ -148,6 +156,17 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
             {/* Expanded Details - Cost Breakdown Only */}
             {expandedLogId === log.id && (
               <div className="px-6 pb-6">
+                {log.location && (
+                  <div className="mb-4 text-sm bg-surface-hover p-3 rounded-lg flex items-center gap-2">
+                    <User className="w-4 h-4 text-text-secondary" />
+                    <div>
+                      <span className="font-semibold text-text-primary">{log.location}</span>
+                      {log.ipAddress && (
+                        <span className="text-xs text-text-secondary font-mono ml-2">{log.ipAddress}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
                 {/* Cost Breakdown Section */}
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
                   <div className="flex items-center gap-2 mb-3">
