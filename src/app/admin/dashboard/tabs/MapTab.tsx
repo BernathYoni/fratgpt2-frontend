@@ -85,8 +85,8 @@ export default function MapTab() {
               {isRecent(act.timestamp) && (
                 <motion.circle
                     initial={{ r: 3, opacity: 1, strokeWidth: 2 }}
-                    animate={{ r: 20, opacity: 0, strokeWidth: 0 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                    animate={{ r: 30, opacity: 0, strokeWidth: 0 }}
+                    transition={{ duration: 2.5, ease: "easeOut" }}
                     fill="none"
                     stroke="#ef4444"
                 />
