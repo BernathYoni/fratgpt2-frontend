@@ -139,7 +139,7 @@ export default function AdminDashboard() {
     <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
       {/* SIDEBAR */}
       <div className="min-w-0 lg:w-[250px] lg:flex-shrink-0 lg:flex-grow-0">
-        <div className="flex flex-col gap-6 fixed top-20 sm:top-24 lg:top-32 left-6 lg:left-16 w-full lg:w-[250px] max-h-[calc(100vh-5rem)] sm:max-h-[calc(100vh-6rem)] lg:max-h-[calc(100vh-8rem)] overflow-y-auto pb-4 z-40">
+        <div className="flex flex-col gap-6 fixed top-20 sm:top-24 lg:top-32 left-4 sm:left-8 lg:left-16 w-full lg:w-[250px] max-h-[calc(100vh-5rem)] sm:max-h-[calc(100vh-6rem)] lg:max-h-[calc(100vh-8rem)] overflow-y-auto pb-4 z-40">
         {/* Sidebar Header */}
         <div className="flex items-center gap-3 mb-2 px-2">
           <div className="w-8 h-8 bg-gradient-to-br from-pink-500/20 via-orange-500/20 to-yellow-500/20 rounded-lg flex items-center justify-center border border-orange-500/30">
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex flex-col gap-8 min-w-0 lg:pl-[250px]">
+      <div className="flex flex-col gap-8 min-w-0">
         
         {/* Content Header (Title + Timeframe) */}
         {activeTab !== 'affiliates' && (
