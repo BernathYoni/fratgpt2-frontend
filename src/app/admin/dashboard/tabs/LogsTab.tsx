@@ -96,11 +96,8 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
             >
               {/* Top Section - Prominent action header on left, metadata on right */}
               <div className="flex items-center justify-between gap-4">
-                {/* Left: Chat icon + Prominent "Solve" header + Input text preview */}
+                {/* Left: Prominent "Solve" header + Input text preview */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg flex-shrink-0">
-                    <MessageSquare className="w-7 h-7 text-white" />
-                  </div>
                   <h3 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
                     Solve
                   </h3>
@@ -156,20 +153,12 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
             {/* Expanded Details - Cost Breakdown Only */}
             {expandedLogId === log.id && (
               <div className="px-6 pb-6">
-                {log.location && (
-                  <div className="mb-4 text-sm bg-surface-hover p-3 rounded-lg flex items-center gap-2">
-                    <User className="w-4 h-4 text-text-secondary" />
-                    <div>
-                      <span className="font-semibold text-text-primary">{log.location}</span>
-                      {log.ipAddress && (
-                        <span className="text-xs text-text-secondary font-mono ml-2">{log.ipAddress}</span>
-                      )}
-                    </div>
-                  </div>
-                )}
                 {/* Cost Breakdown Section */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                <div className="mt-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
                   <div className="flex items-center gap-2 mb-3">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    <span className="text-sm font-semibold text-gray-600">Model Breakdown</span>
+                  </div>
                     <DollarSign className="w-5 h-5 text-green-600" />
                     <span className="text-sm font-semibold text-gray-600">Model Breakdown</span>
                   </div>
