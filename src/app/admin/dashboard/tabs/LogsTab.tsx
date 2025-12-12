@@ -159,9 +159,6 @@ export default function LogsTab({ data, page, setPage }: LogsTabProps) {
                     <DollarSign className="w-5 h-5 text-green-600" />
                     <span className="text-sm font-semibold text-gray-600">Model Breakdown</span>
                   </div>
-                    <DollarSign className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-semibold text-gray-600">Model Breakdown</span>
-                  </div>
 
                   {/* Model-by-Model Breakdown */}
                   <div className="space-y-2">
