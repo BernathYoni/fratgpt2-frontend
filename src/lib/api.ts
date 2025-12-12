@@ -465,6 +465,29 @@ export class ApiClient {
       body: JSON.stringify({ scope }),
     });
   }
+
+  async getAdminMiscStats(token: string, startDate: string, endDate: string) {
+    return this.request<{
+      snips: {
+        count: number;
+        totalCost: number;
+        avgCost: number;
+        modes: {
+          FAST: { avgCost: number; count: number };
+          REGULAR: { avgCost: number; count: number };
+          EXPERT: { avgCost: number; count: number };
+        };
+      };
+      screens: {
+        count: number;
+        totalCost: number;
+        avgCost: number;
+      };
+      totalSolves: number;
+    }>(`/admin/stats/misc?startDate=${startDate}&endDate=${endDate}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
 }
 
 export const api = new ApiClient();

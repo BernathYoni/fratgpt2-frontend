@@ -3,18 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { DollarSign, Users, FileText, Link as LinkIcon, Shield, Calendar, Trash2 } from 'lucide-react';
+import { DollarSign, Users, FileText, Link as LinkIcon, Shield, Calendar, Trash2, BarChart2 } from 'lucide-react';
 import CostTab from './tabs/CostTab';
 import UsersTab from './tabs/UsersTab';
 import AffiliatesTab from './tabs/AffiliatesTab';
 import LogsTab from './tabs/LogsTab';
+import MiscStatsTab from './tabs/MiscStatsTab';
 
 type Timeframe = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'all';
-type Tab = 'cost' | 'users' | 'logs' | 'affiliates';
+type Tab = 'cost' | 'users' | 'logs' | 'affiliates' | 'misc';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>('cost');
-  const [timeframe, setTimeframe] = useState<Timeframe>('today');
+  const [activeTab, setActiveTab] = useState<Tab>('misc');
+  const [timeframe, setTimeframe] = useState<Timeframe>('all');
   const [loading, setLoading] = useState(false);
   
   // Data states
@@ -24,6 +25,7 @@ export default function AdminDashboard() {
   const [logsData, setLogsData] = useState<any>(null);
   const [logsPage, setLogsPage] = useState(1);
   const [affiliatesData, setAffiliatesData] = useState<any[] | null>(null);
+  const [miscStatsData, setMiscStatsData] = useState<any>(null);
 
   // Reset stats state
   const [resetting, setResetting] = useState(false);
@@ -94,6 +96,11 @@ export default function AdminDashboard() {
         if (res.success && res.data) {
           setAffiliatesData(res.data);
         }
+      } else if (activeTab === 'misc') {
+        const res = await api.getAdminMiscStats(token, startDate, endDate);
+        if (res.success) {
+          setMiscStatsData(res.data);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch admin data:', err);
@@ -152,6 +159,18 @@ export default function AdminDashboard() {
 
         {/* Sidebar Nav */}
         <div className="flex flex-col gap-2">
+          <button
+            onClick={() => setActiveTab('misc')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
+              activeTab === 'misc'
+                ? 'bg-gradient-to-r from-teal-500/10 to-emerald-500/10 text-teal-500 border border-teal-500/20 shadow-sm'
+                : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+            }`}
+          >
+            <BarChart2 className="w-5 h-5" />
+            Misc Stats
+          </button>
+
           <button
             onClick={() => setActiveTab('cost')}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${ 
@@ -225,20 +244,23 @@ export default function AdminDashboard() {
                 {activeTab === 'cost' && <DollarSign className="w-5 h-5 text-orange-500" />}
                 {activeTab === 'users' && <Users className="w-5 h-5 text-purple-500" />}
                 {activeTab === 'logs' && <FileText className="w-5 h-5 text-blue-500" />}
+                {activeTab === 'misc' && <BarChart2 className="w-5 h-5 text-teal-500" />}
                 
                 {activeTab === 'cost' && 'Financial Overview'}
                 {activeTab === 'users' && 'User Management'}
                 {activeTab === 'logs' && 'System Logs'}
+                {activeTab === 'misc' && 'Miscellaneous Statistics'}
               </h2>
               <p className="text-xs text-text-secondary mt-1">
                 {activeTab === 'cost' && 'Track API costs and token consumption'}
                 {activeTab === 'users' && 'View all users and their lifetime value'}
                 {activeTab === 'logs' && 'Detailed inspection of all system interactions'}
+                {activeTab === 'misc' && 'Snip vs Screen usage and cost analysis'}
               </p>
             </div>
 
             {/* Timeframe Selector (Hidden for Logs/Users as they use pagination) */}
-            {activeTab === 'cost' && (
+            {(activeTab === 'cost' || activeTab === 'misc') && (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto">
                   <Calendar className="w-4 h-4 text-text-secondary hidden md:block" />
@@ -304,6 +326,11 @@ export default function AdminDashboard() {
               page={logsPage} 
               setPage={setLogsPage} 
             />
+          )}
+
+          {/* MISC STATS TAB CONTENT */}
+          {activeTab === 'misc' && (
+            <MiscStatsTab data={miscStatsData} />
           )}
         </div>
       </div>
