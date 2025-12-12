@@ -17,6 +17,11 @@ interface Activity {
   timestamp: string;
 }
 
+const isRecent = (timestamp: string) => {
+  const diff = Date.now() - new Date(timestamp).getTime();
+  return diff < 30000; // 30 seconds
+};
+
 export default function MapTab() {
   const [activities, setActivities] = useState<Activity[]>([]);
   
@@ -77,13 +82,15 @@ export default function MapTab() {
           {activities.map((act) => (
             <Marker key={act.id} coordinates={[act.lng, act.lat]}>
               <circle r={3} fill="#ef4444" stroke="#fff" strokeWidth={1} />
-              <motion.circle
-                  initial={{ r: 3, opacity: 1, strokeWidth: 2 }}
-                  animate={{ r: 20, opacity: 0, strokeWidth: 0 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                  fill="none"
-                  stroke="#ef4444"
-              />
+              {isRecent(act.timestamp) && (
+                <motion.circle
+                    initial={{ r: 3, opacity: 1, strokeWidth: 2 }}
+                    animate={{ r: 20, opacity: 0, strokeWidth: 0 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                    fill="none"
+                    stroke="#ef4444"
+                />
+              )}
             </Marker>
           ))}
         </ComposableMap>
