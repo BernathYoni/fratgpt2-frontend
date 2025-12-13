@@ -505,6 +505,14 @@ export class ApiClient {
       headers: { Authorization: `Bearer ${token}` },
     });
   }
+
+  async copilotChat(token: string, messages: any[]) {
+    return this.request<{ role: string; content: string }>('/admin/copilot/chat', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ messages }),
+    });
+  }
 }
 
 export const api = new ApiClient();
