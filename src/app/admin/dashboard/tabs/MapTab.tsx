@@ -19,7 +19,7 @@ interface Activity {
 
 const isRecent = (timestamp: string) => {
   const diff = Date.now() - new Date(timestamp).getTime();
-  return diff < 30000; // 30 seconds
+  return diff < 2000; // 2 seconds
 };
 
 export default function MapTab() {
@@ -107,7 +107,7 @@ export default function MapTab() {
             .filter(act => showHistory || isRecent(act.timestamp))
             .map((act) => (
             <Marker key={act.id} coordinates={[act.lng, act.lat]}>
-              <circle r={3} fill="#ef4444" stroke="#fff" strokeWidth={1} />
+              {showHistory && <circle r={3} fill="#ef4444" stroke="#fff" strokeWidth={1} />}
               {isRecent(act.timestamp) && (
                 <motion.circle
                     initial={{ r: 3, opacity: 1, strokeWidth: 2 }}
