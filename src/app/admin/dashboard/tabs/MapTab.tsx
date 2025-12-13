@@ -24,6 +24,7 @@ const isRecent = (timestamp: string) => {
 
 export default function MapTab() {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [showHistory, setShowHistory] = useState(true);
   
   const fetchData = async () => {
     const token = getToken();
@@ -56,6 +57,29 @@ export default function MapTab() {
           Live Activity
         </h3>
         <p className="text-slate-400 text-xs mt-1">Real-time solves across the US</p>
+        
+        <div className="mt-3 flex items-center gap-1 bg-slate-950/50 p-1 rounded-lg border border-slate-800">
+          <button
+            onClick={() => setShowHistory(false)}
+            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              !showHistory 
+                ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            Live Only
+          </button>
+          <button
+            onClick={() => setShowHistory(true)}
+            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              showHistory 
+                ? 'bg-slate-700 text-white shadow-lg' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            History
+          </button>
+        </div>
       </div>
 
       <div className="w-full h-full flex items-center justify-center bg-slate-950">
@@ -79,7 +103,9 @@ export default function MapTab() {
             }
           </Geographies>
           
-          {activities.map((act) => (
+          {activities
+            .filter(act => showHistory || isRecent(act.timestamp))
+            .map((act) => (
             <Marker key={act.id} coordinates={[act.lng, act.lat]}>
               <circle r={3} fill="#ef4444" stroke="#fff" strokeWidth={1} />
               {isRecent(act.timestamp) && (
