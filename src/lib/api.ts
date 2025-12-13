@@ -412,6 +412,8 @@ export class ApiClient {
         lifetimeSolves: number;
         usageThisMonthPercent: number;
         averageMonthlyUsagePercent: number;
+        lastIp?: string | null;
+        location?: string;
       }>;
       pagination: {
         total: number;
