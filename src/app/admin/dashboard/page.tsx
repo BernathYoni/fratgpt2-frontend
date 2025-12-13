@@ -83,6 +83,11 @@ export default function AdminDashboard() {
           console.log('Admin Financials:', res.data); // Debug log
           setFinancials(res.data);
         }
+        // Also fetch misc stats for the Snip Cost card
+        const miscRes = await api.getAdminMiscStats(token, startDate, endDate);
+        if (miscRes.success) {
+          setMiscStatsData(miscRes.data);
+        }
       } else if (activeTab === 'users') {
         const res = await api.getAdminUsers(token, usersPage, 50);
         if (res.success) {
@@ -331,7 +336,7 @@ export default function AdminDashboard() {
           
           {/* COST TAB CONTENT */}
           {activeTab === 'cost' && (
-            <CostTab data={financials} />
+            <CostTab data={financials} snipStats={miscStatsData?.snips} />
           )}
 
           {/* USERS TAB CONTENT */}

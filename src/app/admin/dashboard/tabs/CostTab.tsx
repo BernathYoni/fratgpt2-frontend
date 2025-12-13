@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card } from '@/app/components/ui/Card';
-import { DollarSign, Activity } from 'lucide-react';
+import { DollarSign, Activity, BarChart2 } from 'lucide-react';
 import { formatCurrency, formatNumber } from '../utils';
 
 interface CostTabProps {
   data: any;
+  snipStats?: any;
 }
 
-export default function CostTab({ data }: CostTabProps) {
+export default function CostTab({ data, snipStats }: CostTabProps) {
   if (!data) return null;
 
   return (
@@ -61,6 +62,60 @@ export default function CostTab({ data }: CostTabProps) {
           <p className="text-xs text-text-secondary mt-1">{data.providers.claude.percentage.toFixed(1)}% of total</p>
         </Card>
       </div>
+
+      {/* Breakdown: Snip Cost by Mode (Moved from MiscStatsTab) */}
+      {snipStats?.modes && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-text-primary mb-6 flex items-center gap-2">
+              <BarChart2 className="w-5 h-5 text-primary" />
+              Average Cost per Snip (By Mode)
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Fast Mode */}
+              <div className="bg-surface-paper rounded-xl p-4 border border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="font-semibold text-text-primary">Fast Mode</span>
+                  </div>
+                  <div className="text-3xl font-bold text-text-primary mb-1">
+                      {formatCurrency(snipStats.modes.FAST.avgCost)}
+                  </div>
+                  <div className="text-xs text-text-secondary">
+                      Based on {formatNumber(snipStats.modes.FAST.count)} solves
+                  </div>
+              </div>
+
+              {/* Regular Mode */}
+              <div className="bg-surface-paper rounded-xl p-4 border border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <span className="font-semibold text-text-primary">Regular Mode</span>
+                  </div>
+                  <div className="text-3xl font-bold text-text-primary mb-1">
+                      {formatCurrency(snipStats.modes.REGULAR.avgCost)}
+                  </div>
+                  <div className="text-xs text-text-secondary">
+                      Based on {formatNumber(snipStats.modes.REGULAR.count)} solves
+                  </div>
+              </div>
+
+              {/* Expert Mode */}
+              <div className="bg-surface-paper rounded-xl p-4 border border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                      <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                      <span className="font-semibold text-text-primary">Expert Mode</span>
+                  </div>
+                  <div className="text-3xl font-bold text-text-primary mb-1">
+                      {formatCurrency(snipStats.modes.EXPERT.avgCost)}
+                  </div>
+                  <div className="text-xs text-text-secondary">
+                      Based on {formatNumber(snipStats.modes.EXPERT.count)} solves
+                  </div>
+              </div>
+          </div>
+        </Card>
+      )}
 
       {/* Detailed Token Breakdown */}
       <Card className="p-6">

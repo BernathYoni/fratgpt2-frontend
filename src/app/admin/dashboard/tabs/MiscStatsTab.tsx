@@ -76,58 +76,6 @@ export default function MiscStatsTab({ data }: MiscStatsTabProps) {
             </div>
         </Card>
       </div>
-
-      {/* Breakdown: Snip Cost by Mode */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-text-primary mb-6 flex items-center gap-2">
-            <BarChart2 className="w-5 h-5 text-primary" />
-            Average Cost per Snip (By Mode)
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Fast Mode */}
-            <div className="bg-surface-paper rounded-xl p-4 border border-border">
-                <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span className="font-semibold text-text-primary">Fast Mode</span>
-                </div>
-                <div className="text-3xl font-bold text-text-primary mb-1">
-                    {formatCurrency(snips.modes.FAST.avgCost)}
-                </div>
-                <div className="text-xs text-text-secondary">
-                    Based on {formatNumber(snips.modes.FAST.count)} solves
-                </div>
-            </div>
-
-            {/* Regular Mode */}
-            <div className="bg-surface-paper rounded-xl p-4 border border-border">
-                <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span className="font-semibold text-text-primary">Regular Mode</span>
-                </div>
-                <div className="text-3xl font-bold text-text-primary mb-1">
-                    {formatCurrency(snips.modes.REGULAR.avgCost)}
-                </div>
-                <div className="text-xs text-text-secondary">
-                    Based on {formatNumber(snips.modes.REGULAR.count)} solves
-                </div>
-            </div>
-
-            {/* Expert Mode */}
-            <div className="bg-surface-paper rounded-xl p-4 border border-border">
-                <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                    <span className="font-semibold text-text-primary">Expert Mode</span>
-                </div>
-                <div className="text-3xl font-bold text-text-primary mb-1">
-                    {formatCurrency(snips.modes.EXPERT.avgCost)}
-                </div>
-                <div className="text-xs text-text-secondary">
-                    Based on {formatNumber(snips.modes.EXPERT.count)} solves
-                </div>
-            </div>
-        </div>
-      </Card>
     </div>
   );
 }
